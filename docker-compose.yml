@@ -13,7 +13,7 @@ services:
       - POSTGRES_PORT=5432
       - TZ=Europe/Moscow
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U root -d ewm" ]
+      test: [ "CMD-SHELL", "pg_isready -U root -d explorewithme" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -31,7 +31,7 @@ services:
       - POSTGRES_PORT=5432
       - TZ=Europe/Moscow
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U root -d ewm" ]
+      test: [ "CMD-SHELL", "pg_isready -U root -d explorewithme" ]
       interval: 5s
       timeout: 5s
       retries: 5

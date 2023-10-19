@@ -15,7 +15,7 @@ public class StatsClient {
     private final WebClient webClient;
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public StatsClient(@Value("${stats-service.url}") String host) {
+    public StatsClient(@Value("${stats-server.url}") String host) {
         this.webClient = WebClient.create(host);
     }
 

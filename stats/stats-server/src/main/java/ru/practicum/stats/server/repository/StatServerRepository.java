@@ -1,4 +1,4 @@
-package ru.practicum.stats.server;
+package ru.practicum.stats.server.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
