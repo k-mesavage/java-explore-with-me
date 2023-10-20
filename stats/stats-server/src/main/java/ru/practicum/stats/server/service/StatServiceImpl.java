@@ -3,7 +3,7 @@ package ru.practicum.stats.server.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.stats.dto.StatInputDto;
+import ru.practicum.stats.dto.StatDto;
 import ru.practicum.stats.dto.StatOutputDto;
 import ru.practicum.stats.server.mapper.StatMapper;
 import ru.practicum.stats.server.model.Stat;
@@ -23,10 +23,10 @@ public class StatServiceImpl implements StatService {
     private final DateValidator validator;
     private final StatMapper mapper;
 
-    public Stat create(StatInputDto statInputDto) {
-        Stat result = Optional.of(repository.save(mapper.toStat(statInputDto))).orElseThrow();
-        log.info("Hit {} added.", statInputDto);
-        return result;
+    public StatDto create(StatDto statDto) {
+        Stat result = Optional.of(repository.save(mapper.toStat(statDto))).orElseThrow();
+        log.info("Hit {} added.", statDto);
+        return mapper.toDto(result);
     }
 
     public List<StatOutputDto> get(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {

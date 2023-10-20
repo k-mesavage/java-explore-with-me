@@ -7,7 +7,8 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-public class StatInputDto {
+public class StatDto {
+    private Long id;
     private String app;
     private String uri;
     private String ip;

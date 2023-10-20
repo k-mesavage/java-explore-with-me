@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
-import ru.practicum.stats.dto.StatInputDto;
+import ru.practicum.stats.dto.StatDto;
 import ru.practicum.stats.dto.StatOutputDto;
 
 import java.time.LocalDateTime;
@@ -19,13 +19,13 @@ public class StatsClient {
         this.webClient = WebClient.create(host);
     }
 
-    public StatInputDto post(StatInputDto statInputDto) {
+    public StatDto post(StatDto statDto) {
         return webClient.post()
                 .uri("/hit")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .bodyValue(statInputDto)
+                .bodyValue(statDto)
                 .retrieve()
-                .bodyToMono(StatInputDto.class)
+                .bodyToMono(StatDto.class)
                 .block();
     }
 
