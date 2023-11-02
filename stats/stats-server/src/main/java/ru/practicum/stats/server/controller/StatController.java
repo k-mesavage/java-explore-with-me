@@ -24,6 +24,7 @@ public class StatController {
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<StatDto> post(@RequestBody StatDto statDto) {
+        log.info("Add hit {}", statDto);
         return ResponseEntity.status(201).body(service.create(statDto));
     }
 
@@ -32,6 +33,7 @@ public class StatController {
                                    @RequestParam @DateTimeFormat(pattern = dateTimeFormat) LocalDateTime end,
                                    @RequestParam(required = false) List<String> uris,
                                    @RequestParam(defaultValue = "false") boolean unique) {
+        log.info("Get hits");
         return ResponseEntity.ok().body(service.get(start, end, uris, unique));
     }
 }

@@ -1,8 +1,10 @@
 package ru.practicum.stats.client;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import ru.practicum.stats.dto.StatDto;
 import ru.practicum.stats.dto.StatOutputDto;
@@ -11,6 +13,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Component("statsClient")
+@RequiredArgsConstructor
 public class StatsClient {
     private final WebClient webClient;
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
