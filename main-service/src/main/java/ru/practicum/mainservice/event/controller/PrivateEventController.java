@@ -13,6 +13,8 @@ import ru.practicum.mainservice.exception.WrongConditionException;
 import ru.practicum.mainservice.request.dto.ParticipationRequestDto;
 import ru.practicum.mainservice.request.service.RequestService;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -72,5 +74,10 @@ public class PrivateEventController {
     }
 
     @GetMapping("/{userId}/events/{eventId}/requests")
-    
+    public List<ParticipationRequestDto> getRequests(@PathVariable Long userId,
+                                                     @PathVariable Long eventId)
+            throws IncorrectObjectException, IncorrectFieldException {
+        log.info("User {} get requests", userId);
+        return requestService.getRequestsByInitiator(userId, eventId);
+    }
 }
