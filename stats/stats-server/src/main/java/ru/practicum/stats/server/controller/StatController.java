@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.stats.dto.StatDto;
 import ru.practicum.stats.dto.StatOutputDto;
@@ -22,15 +23,15 @@ public class StatController {
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
-    public StatDto post(@RequestBody StatDto statDto) {
-        return service.create(statDto);
+    public ResponseEntity<StatDto> post(@RequestBody StatDto statDto) {
+        return ResponseEntity.status(201).body(service.create(statDto));
     }
 
     @GetMapping("/stats")
-    public List<StatOutputDto> get(@RequestParam @DateTimeFormat(pattern = dateTimeFormat) LocalDateTime start,
+    public ResponseEntity<List<StatOutputDto>> get(@RequestParam @DateTimeFormat(pattern = dateTimeFormat) LocalDateTime start,
                                    @RequestParam @DateTimeFormat(pattern = dateTimeFormat) LocalDateTime end,
                                    @RequestParam(required = false) List<String> uris,
                                    @RequestParam(defaultValue = "false") boolean unique) {
-        return service.get(start, end, uris, unique);
+        return ResponseEntity.ok().body(service.get(start, end, uris, unique));
     }
 }
