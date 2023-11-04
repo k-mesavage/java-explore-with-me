@@ -25,7 +25,8 @@ public class StatsClient {
 
     public StatDto post(StatDto statDto) {
         return webClient.post()
-                .uri("/hit")
+                .uri(uriBuilder -> uriBuilder.path("/hit")
+                        .build())
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .bodyValue(statDto)
                 .retrieve()

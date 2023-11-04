@@ -35,7 +35,7 @@ public class PublicEventController {
             @RequestParam(defaultValue = "10") int size,
             HttpServletRequest httpServletRequest) {
 
-        statCollector.collect(httpServletRequest);
+
         eventService.addViewsForEvents(eventService.getEvents(
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size));
         log.info("Public get all events");
@@ -46,7 +46,7 @@ public class PublicEventController {
     @GetMapping("/{eventId}")
     public EventFullDto getEventById(@PathVariable Long eventId,
                                      HttpServletRequest httpServletRequest) throws IncorrectObjectException {
-        statCollector.collect(httpServletRequest);
+
         eventService.addViewForEvent(eventService.getEventById(eventId));
         log.info("Public get event {}", eventId);
         return eventService.getEventById(eventId);

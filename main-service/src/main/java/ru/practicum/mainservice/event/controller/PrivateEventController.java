@@ -55,6 +55,13 @@ public class PrivateEventController {
         return eventService.getEventByInitiator(userId, eventId);
     }
 
+    @GetMapping("/{userId}/events")
+    public List<EventFullDto> getEventsByInitiator(@PathVariable Long userId,
+                                                   @RequestParam(defaultValue = "0") int from,
+                                                   @RequestParam(defaultValue = "10") int size) throws IncorrectObjectException {
+        return eventService.getEventsByInitiator(userId, from, size);
+    }
+
     @PatchMapping("/{userId}/events/{eventId}/requests/{reqId}/confirm")
     public ParticipationRequestDto confirmRequest(@PathVariable Long userId,
                                                   @PathVariable Long eventId,
