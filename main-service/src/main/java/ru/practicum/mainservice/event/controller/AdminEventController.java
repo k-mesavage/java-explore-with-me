@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.mainservice.event.dto.EventFullDto;
 import ru.practicum.mainservice.event.dto.UpdateEventAdminRequestDto;
 import ru.practicum.mainservice.event.service.EventService;
+import ru.practicum.mainservice.exception.IncorrectFieldException;
 import ru.practicum.mainservice.exception.IncorrectObjectException;
 import ru.practicum.mainservice.exception.WrongConditionException;
 
@@ -20,7 +21,7 @@ public class AdminEventController {
 
     @PutMapping("/{eventId}")
     public EventFullDto updateEvent(@PathVariable Long eventId,
-                                    @RequestBody UpdateEventAdminRequestDto eventRequest) throws IncorrectObjectException {
+                                    @RequestBody UpdateEventAdminRequestDto eventRequest) throws IncorrectObjectException, IncorrectFieldException {
         log.info("Admin update event {}", eventId);
         return eventService.updateEventByAdmin(eventId, eventRequest);
     }
