@@ -24,7 +24,7 @@ public class StatServiceImpl implements StatService {
     private final StatMapper mapper;
 
     public StatDto create(StatDto statDto) {
-        Stat result = Optional.of(repository.save(mapper.toStat(statDto))).orElseThrow();
+        Stat result = repository.save(mapper.toStat(statDto));
         log.info("Hit {} added.", statDto);
         return mapper.toDto(result);
     }

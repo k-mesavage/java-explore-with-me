@@ -38,7 +38,7 @@ services:
 
   stats-server:
     build: ./stats/stats-server
-    image: stats-server-dock
+    image: stats-server
     container_name: stats-server
     ports:
       - "9090:9090"
@@ -55,7 +55,7 @@ services:
 
   ewm-service:
     build: ./main-service
-    image: ewm-service-dock
+    image: ewm-service
     container_name: ewm-service
     ports:
       - "8080:8080"

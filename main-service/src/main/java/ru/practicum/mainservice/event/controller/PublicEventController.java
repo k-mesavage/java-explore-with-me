@@ -7,10 +7,12 @@ import ru.practicum.mainservice.event.dto.EventFullDto;
 import ru.practicum.mainservice.event.dto.EventShortDto;
 import ru.practicum.mainservice.event.service.EventService;
 import ru.practicum.mainservice.exception.IncorrectObjectException;
+import ru.practicum.mainservice.exception.ObjectNotFoundException;
+import ru.practicum.mainservice.exception.WrongConditionException;
 import ru.practicum.mainservice.util.EventSort;
-import ru.practicum.mainservice.util.StatCollector;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.URISyntaxException;
 import java.util.List;
 
 @Slf4j
@@ -20,7 +22,6 @@ import java.util.List;
 public class PublicEventController {
 
     private final EventService eventService;
-    private final StatCollector statCollector;
 
     @GetMapping
     public List<EventShortDto> getAllEvents(
@@ -33,22 +34,18 @@ public class PublicEventController {
             @RequestParam(required = false) EventSort sort,
             @RequestParam(defaultValue = "0") int from,
             @RequestParam(defaultValue = "10") int size,
-            HttpServletRequest httpServletRequest) {
+            HttpServletRequest httpServletRequest) throws WrongConditionException, URISyntaxException {
 
-
-        eventService.addViewsForEvents(eventService.getEvents(
-                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size));
         log.info("Public get all events");
         return eventService.getEvents(
-                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
+                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, httpServletRequest);
     }
 
     @GetMapping("/{eventId}")
     public EventFullDto getEventById(@PathVariable Long eventId,
-                                     HttpServletRequest httpServletRequest) throws IncorrectObjectException {
-
-        eventService.addViewForEvent(eventService.getEventById(eventId));
+                                     HttpServletRequest httpServletRequest)
+            throws IncorrectObjectException, URISyntaxException, ObjectNotFoundException {
         log.info("Public get event {}", eventId);
-        return eventService.getEventById(eventId);
+        return eventService.getEventById(eventId, httpServletRequest);
     }
 }

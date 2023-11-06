@@ -1,14 +1,17 @@
 package ru.practicum.mainservice.event.mapper;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.mainservice.category.dto.CategoryDto;
 import ru.practicum.mainservice.category.model.Category;
+import ru.practicum.mainservice.category.repository.CategoryRepository;
 import ru.practicum.mainservice.event.dto.EventFullDto;
 import ru.practicum.mainservice.event.dto.EventShortDto;
 import ru.practicum.mainservice.event.dto.NewEventDto;
 import ru.practicum.mainservice.event.model.Event;
 import ru.practicum.mainservice.location.model.Location;
 import ru.practicum.mainservice.user.dto.UserShortDto;
+import ru.practicum.mainservice.util.EventChecker;
 import ru.practicum.mainservice.util.State;
 
 import java.time.LocalDateTime;
@@ -16,7 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class EventMapper {
+
+    private final EventChecker eventChecker;
+    private final CategoryRepository categoryRepository;
 
     public Event toEvent(NewEventDto newEventDto) {
         Event event = new Event();
@@ -24,9 +31,9 @@ public class EventMapper {
         event.setDescription(newEventDto.getDescription());
         event.setTitle(newEventDto.getTitle());
         event.setEventDate(newEventDto.getEventDate());
-        event.setPaid(newEventDto.getPaid());
+        event.setPaid(newEventDto.isPaid());
         event.setParticipantLimit(newEventDto.getParticipantLimit());
-        event.setRequestModeration(newEventDto.getRequestModeration());
+        event.setRequestModeration(newEventDto.isRequestModeration());
         event.setLat(newEventDto.getLocation().getLat());
         event.setLon(newEventDto.getLocation().getLon());
         event.setConfirmedRequests(0);
@@ -65,7 +72,6 @@ public class EventMapper {
         return eventFullDtos;
     }
 
-
     public EventShortDto toEventShortDto(Event event) {
         return EventShortDto.builder()
                 .id(event.getId())
@@ -86,4 +92,5 @@ public class EventMapper {
         }
         return eventShortDtos;
     }
+
 }

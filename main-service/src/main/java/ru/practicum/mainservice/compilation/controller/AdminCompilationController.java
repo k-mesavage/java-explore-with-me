@@ -1,6 +1,5 @@
 package ru.practicum.mainservice.compilation.controller;
 
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -8,6 +7,7 @@ import ru.practicum.mainservice.compilation.dto.CompilationDto;
 import ru.practicum.mainservice.compilation.dto.NewCompilationDto;
 import ru.practicum.mainservice.compilation.service.CompilationService;
 import ru.practicum.mainservice.exception.IncorrectObjectException;
+import ru.practicum.mainservice.exception.ObjectNotFoundException;
 import ru.practicum.mainservice.exception.WrongConditionException;
 
 import javax.validation.Valid;
@@ -22,7 +22,7 @@ public class AdminCompilationController {
 
     @PostMapping
     public CompilationDto addCompilation(@RequestBody @Valid NewCompilationDto newCompilationDto)
-            throws IncorrectObjectException {
+            throws IncorrectObjectException, ObjectNotFoundException {
         log.info("Add compilation {}", newCompilationDto);
         return service.createCompilation(newCompilationDto);
     }
@@ -35,14 +35,14 @@ public class AdminCompilationController {
 
     @PatchMapping("/{compId}/events/{eventId}")
     public void addEventToCompilation(@PathVariable Long compId,
-                                      @PathVariable Long eventId) throws IncorrectObjectException {
+                                      @PathVariable Long eventId) throws IncorrectObjectException, ObjectNotFoundException {
         log.info("Add event {} to compilation {}", eventId, compId);
         service.addEventToCompilation(compId, eventId);
     }
 
     @DeleteMapping("/{compId}/events/{eventId}")
     public void deleteEventFromCompilation(@PathVariable Long compId,
-                                           @PathVariable Long eventId) throws IncorrectObjectException {
+                                           @PathVariable Long eventId) throws IncorrectObjectException, ObjectNotFoundException {
         log.info("Delete event {} from compilation {}", eventId, compId);
         service.deleteEventFromCompilation(compId, eventId);
     }

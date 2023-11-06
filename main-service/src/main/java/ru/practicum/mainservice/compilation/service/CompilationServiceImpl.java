@@ -11,6 +11,7 @@ import ru.practicum.mainservice.compilation.repository.CompilationEventRepositor
 import ru.practicum.mainservice.compilation.repository.CompilationRepository;
 import ru.practicum.mainservice.event.service.EventService;
 import ru.practicum.mainservice.exception.IncorrectObjectException;
+import ru.practicum.mainservice.exception.ObjectNotFoundException;
 import ru.practicum.mainservice.exception.WrongConditionException;
 import ru.practicum.mainservice.util.CompilationChecker;
 import ru.practicum.mainservice.util.EventChecker;
@@ -30,7 +31,7 @@ public class CompilationServiceImpl implements CompilationService {
     private final EventService eventService;
 
     @Override
-    public CompilationDto createCompilation(NewCompilationDto newCompilationDto) throws IncorrectObjectException {
+    public CompilationDto createCompilation(NewCompilationDto newCompilationDto) throws ObjectNotFoundException {
         for (Long eventId : newCompilationDto.getEvents()) {
             eventChecker.eventExist(eventId);
         }
@@ -63,14 +64,14 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    public void addEventToCompilation(Long compId, Long eventId) throws IncorrectObjectException {
+    public void addEventToCompilation(Long compId, Long eventId) throws IncorrectObjectException, ObjectNotFoundException {
         compilationChecker.compilationExist(compId);
         eventChecker.eventExist(eventId);
         compilationEventRepository.save(new CompilationEvent(null, compId, eventId));
     }
 
     @Override
-    public void deleteEventFromCompilation(Long compId, Long eventId) throws IncorrectObjectException {
+    public void deleteEventFromCompilation(Long compId, Long eventId) throws IncorrectObjectException, ObjectNotFoundException {
         compilationChecker.compilationExist(compId);
         eventChecker.eventExist(eventId);
         compilationChecker.eventInCompilation(compId, eventId);

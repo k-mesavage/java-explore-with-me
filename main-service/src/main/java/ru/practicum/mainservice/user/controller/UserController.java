@@ -13,6 +13,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @Slf4j
+@Valid
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/users")

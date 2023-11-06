@@ -2,6 +2,7 @@ package ru.practicum.stats.server.mapper;
 
 import org.springframework.stereotype.Service;
 import ru.practicum.stats.dto.StatDto;
+import ru.practicum.stats.dto.StatOutputDto;
 import ru.practicum.stats.server.model.Stat;
 
 @Service
@@ -16,12 +17,6 @@ public class StatMapper {
     }
 
     public StatDto toDto(Stat stat) {
-        return StatDto.builder()
-                .id(stat.getId())
-                .app(stat.getApp())
-                .ip(stat.getIp())
-                .uri(stat.getUri())
-                .timeStamp(stat.getTimeStamp())
-                .build();
+        return new StatDto(stat.getId(), stat.getApp(), stat.getUri(), stat.getIp(), stat.getTimeStamp());
     }
 }

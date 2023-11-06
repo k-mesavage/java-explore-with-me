@@ -23,17 +23,17 @@ public class StatController {
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<StatDto> post(@RequestBody StatDto statDto) {
+    public StatDto post(@RequestBody StatDto statDto) {
         log.info("Add hit {}", statDto);
-        return ResponseEntity.status(201).body(service.create(statDto));
+        return service.create(statDto);
     }
 
     @GetMapping("/stats")
-    public ResponseEntity<List<StatOutputDto>> get(@RequestParam @DateTimeFormat(pattern = dateTimeFormat) LocalDateTime start,
-                                   @RequestParam @DateTimeFormat(pattern = dateTimeFormat) LocalDateTime end,
+    public List<StatOutputDto> get(@RequestParam(required = false) @DateTimeFormat(pattern = dateTimeFormat) LocalDateTime start,
+                                   @RequestParam(required = false) @DateTimeFormat(pattern = dateTimeFormat) LocalDateTime end,
                                    @RequestParam(required = false) List<String> uris,
                                    @RequestParam(defaultValue = "false") boolean unique) {
         log.info("Get hits");
-        return ResponseEntity.ok().body(service.get(start, end, uris, unique));
+        return service.get(start, end, uris, unique);
     }
 }

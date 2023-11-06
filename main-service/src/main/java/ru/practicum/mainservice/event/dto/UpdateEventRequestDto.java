@@ -1,17 +1,24 @@
 package ru.practicum.mainservice.event.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.format.annotation.DateTimeFormat;
+import lombok.NoArgsConstructor;
 import ru.practicum.mainservice.location.model.Location;
-import ru.practicum.mainservice.util.State;
+import ru.practicum.mainservice.util.StateAction;
 
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Data
 @Builder
-public class UpdateEventAdminRequestDto {
+@AllArgsConstructor
+@NoArgsConstructor
+public class UpdateEventRequestDto {
+
+    @Size(min = 3, max = 120)
+    private String title;
 
     @Size(min = 20, max = 2000)
     private String annotation;
@@ -21,7 +28,7 @@ public class UpdateEventAdminRequestDto {
     @Size(min = 20, max = 7000)
     private String description;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
 
     private Location location;
@@ -32,8 +39,5 @@ public class UpdateEventAdminRequestDto {
 
     private Boolean requestModeration;
 
-    private State stateAction;
-
-    @Size(min = 3, max = 120)
-    private String title;
+    private StateAction stateAction;
 }

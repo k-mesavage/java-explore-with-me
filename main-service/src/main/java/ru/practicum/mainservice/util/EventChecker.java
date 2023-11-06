@@ -2,10 +2,11 @@ package ru.practicum.mainservice.util;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.mainservice.event.dto.UpdateEventRequestDto;
 import ru.practicum.mainservice.event.model.Event;
 import ru.practicum.mainservice.event.repository.EventRepository;
 import ru.practicum.mainservice.exception.IncorrectFieldException;
-import ru.practicum.mainservice.exception.IncorrectObjectException;
+import ru.practicum.mainservice.exception.ObjectNotFoundException;
 import ru.practicum.mainservice.exception.WrongConditionException;
 
 import java.time.LocalDateTime;
@@ -17,26 +18,47 @@ public class EventChecker {
 
     private final EventRepository eventRepository;
 
-    public void isEventDateBeforeTwoHours(LocalDateTime date) throws IncorrectFieldException {
+    public void isEventDateBeforeTwoHours(LocalDateTime date) throws WrongConditionException {
         if (date.isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new IncorrectFieldException("Incorrect time of event");
+            throw new WrongConditionException("Incorrect time of event");
         }
     }
 
-    public void eventExist(Long eventId) throws IncorrectObjectException {
+    public void eventExist(Long eventId) throws ObjectNotFoundException {
         if (!eventRepository.existsById(eventId)) {
-            throw new IncorrectObjectException("There is no event with id " + eventId);
+            throw new ObjectNotFoundException("There is no event");
+        }
+    }
+
+    public void eventPublished(Event event) throws IncorrectFieldException {
+        if (event.getState().equals(State.PUBLISHED)) {
+            throw new IncorrectFieldException("Event already published");
+        }
+    }
+
+    public void statusForAdminUpdate(Event event, UpdateEventRequestDto requestDto) throws IncorrectFieldException {
+        StateAction stateAction = requestDto.getStateAction();
+        if (stateAction != null) {
+            if (event.getState().equals(State.PUBLISHED) && stateAction.equals(StateAction.PUBLISH_EVENT)) {
+                throw new IncorrectFieldException("Event already published");
+            }
+            if (event.getState().equals(State.CANCELED) && stateAction.equals(StateAction.PUBLISH_EVENT)) {
+                throw new IncorrectFieldException("Event publish canceled");
+            }
+            if (event.getState().equals(State.PUBLISHED) && stateAction.equals(StateAction.REJECT_EVENT)) {
+                throw new IncorrectFieldException("Event already published");
+            }
         }
     }
 
     public void eventInitiatorIsNot(Long eventId, Long userId) throws IncorrectFieldException {
-        if (!Objects.equals(eventRepository.getById(eventId).getInitiator().getId(), userId)) {
+        if (Objects.equals(eventRepository.getById(eventId).getInitiator().getId(), userId)) {
             throw new IncorrectFieldException("User id = " + userId + " is not initiator of event id = " + eventId);
         }
     }
 
     public void eventInitiator(Long eventId, Long userId) throws IncorrectFieldException {
-        if (Objects.equals(eventRepository.getById(eventId).getInitiator().getId(), userId)) {
+        if (!Objects.equals(eventRepository.getById(eventId).getInitiator().getId(), userId)) {
             throw new IncorrectFieldException("User id = " + userId + " is not initiator of event id = " + eventId);
         }
     }
@@ -58,9 +80,11 @@ public class EventChecker {
 
     public void checkEventLimit(Long eventId) throws WrongConditionException {
         Event event = eventRepository.getById(eventId);
-        int spareParticipantSlots = event.getParticipantLimit() - event.getConfirmedRequests();
-        if (spareParticipantSlots == 0) {
-            throw new WrongConditionException("Participants limit for this event has been reached");
+        if (event.getParticipantLimit() != 0) {
+            int spareParticipantSlots = event.getParticipantLimit() - event.getConfirmedRequests();
+            if (spareParticipantSlots == 0) {
+                throw new WrongConditionException("Participants limit for this event has been reached");
+            }
         }
     }
 

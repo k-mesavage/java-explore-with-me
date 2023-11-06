@@ -1,8 +1,10 @@
 package ru.practicum.mainservice.event.repository;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.mainservice.event.model.Event;
 import ru.practicum.mainservice.util.State;
 
@@ -64,14 +66,17 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("select e from Event e where e.id = :eventId and e.state = 'PUBLISHED'")
     Event getByIdPublished(Long eventId);
 
-    @Query("select e from Event e where (e.initiator.id in :users or :users is null) " +
-            "and (:states is null or e.state in :states) and (e.category.id in :categories or :categories is null) " +
-            "and (e.eventDate between :rangeStart and :rangeEnd)")
-    List<Event> findEventsByManyParamsByAdmin(List<Long> users,
-                                              List<State> states,
-                                              List<Long> categories,
-                                              LocalDateTime rangeStart,
-                                              LocalDateTime rangeEnd);
+    List<Event> findEventsByInitiatorIdInAndStateInAndCategoryIdInAndEventDateIsAfterAndEventDateIsBefore(List<Long> users,
+                                                                                                          List<State> states,
+                                                                                                          List<Long> categories,
+                                                                                                          LocalDateTime rangeStart,
+                                                                                                          LocalDateTime rangeEnd,
+                                                                                                          Pageable pageable);
+
+    List<Event> findAllByCategoryIdInAndEventDateIsAfter(List<Long> categories, LocalDateTime now, Pageable pageable);
+    List<Event> findAllByStateInAndEventDateIsAfter(List<State> states, LocalDateTime now, Pageable pageable);
+
+    List<Event> findAllByEventDateIsAfter(LocalDateTime now, Pageable pageable);
 
     @Query("select e from Event e where e.id in :ids")
     List<Event> getAllByIds(List<Long> ids);

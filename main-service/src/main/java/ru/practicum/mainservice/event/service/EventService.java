@@ -3,21 +3,25 @@ package ru.practicum.mainservice.event.service;
 import ru.practicum.mainservice.event.dto.*;
 import ru.practicum.mainservice.exception.IncorrectFieldException;
 import ru.practicum.mainservice.exception.IncorrectObjectException;
+import ru.practicum.mainservice.exception.ObjectNotFoundException;
 import ru.practicum.mainservice.exception.WrongConditionException;
 import ru.practicum.mainservice.util.EventSort;
+import ru.practicum.mainservice.util.State;
 
+import javax.servlet.http.HttpServletRequest;
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.List;
 
 public interface EventService {
 
-    EventFullDto createEvent(NewEventDto newEventDto, Long userId) throws IncorrectFieldException, IncorrectObjectException, SQLException;
+    EventFullDto createEvent(NewEventDto newEventDto, Long userId) throws IncorrectObjectException, SQLException, WrongConditionException;
 
-    EventFullDto updateEvent(UpdateEventUserRequestDto updateEventUserRequestDto, Long userId) throws IncorrectObjectException, IncorrectFieldException, WrongConditionException;
+    EventFullDto updateEvent(UpdateEventRequestDto updateEventUserRequestDto, Long userId, Long eventId) throws IncorrectObjectException, IncorrectFieldException, WrongConditionException, ObjectNotFoundException;
 
-    EventFullDto cancelEvent(Long userId, Long eventId) throws IncorrectObjectException, IncorrectFieldException;
+    EventFullDto cancelEvent(Long userId, Long eventId) throws IncorrectObjectException, IncorrectFieldException, ObjectNotFoundException;
 
-    EventFullDto getEventByInitiator(Long userId, Long eventId) throws IncorrectObjectException, IncorrectFieldException;
+    EventFullDto getEventByInitiator(Long userId, Long eventId) throws IncorrectObjectException, IncorrectFieldException, ObjectNotFoundException;
 
     List<EventFullDto> getEventsByInitiator(Long userId, int from, int size) throws IncorrectObjectException;
 
@@ -29,18 +33,19 @@ public interface EventService {
                                   Boolean onlyAvailable,
                                   EventSort eventSort,
                                   int from,
-                                  int size);
+                                  int size,
+                                  HttpServletRequest request) throws WrongConditionException, URISyntaxException;
 
-    EventFullDto getEventById(Long eventId) throws IncorrectObjectException;
+    EventFullDto getEventById(Long eventId, HttpServletRequest request) throws IncorrectObjectException, URISyntaxException, ObjectNotFoundException;
 
-    EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequestDto updateEventAdminRequest) throws IncorrectObjectException, IncorrectFieldException;
+    EventFullDto updateEventByAdmin(Long eventId, UpdateEventRequestDto updateEventAdminRequest) throws IncorrectObjectException, IncorrectFieldException, WrongConditionException, ObjectNotFoundException;
 
-    EventFullDto publishEventByAdmin(Long eventId) throws IncorrectObjectException, WrongConditionException;
+    EventFullDto publishEventByAdmin(Long eventId) throws IncorrectObjectException, WrongConditionException, ObjectNotFoundException;
 
-    EventFullDto rejectEventByAdmin(Long eventId) throws IncorrectObjectException, WrongConditionException;
+    EventFullDto rejectEventByAdmin(Long eventId) throws IncorrectObjectException, WrongConditionException, ObjectNotFoundException;
 
     List<EventFullDto> getEventsByAdmin(List<Long> users,
-                                        List<String> states,
+                                        List<State> states,
                                         List<Long> categories,
                                         String rangeStart,
                                         String rangeEnd,
@@ -48,8 +53,4 @@ public interface EventService {
                                         int size);
 
     List<EventShortDto> getEventsByCompilationId(Long compilationId);
-
-    void addViewsForEvents(List<EventShortDto> eventsShortDtos);
-
-    void addViewForEvent(EventFullDto eventFullDto);
 }

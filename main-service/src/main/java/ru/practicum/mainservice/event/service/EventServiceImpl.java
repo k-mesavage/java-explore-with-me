@@ -2,6 +2,7 @@ package ru.practicum.mainservice.event.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.mainservice.category.model.Category;
 import ru.practicum.mainservice.category.repository.CategoryRepository;
@@ -12,11 +13,17 @@ import ru.practicum.mainservice.event.model.Event;
 import ru.practicum.mainservice.event.repository.EventRepository;
 import ru.practicum.mainservice.exception.IncorrectFieldException;
 import ru.practicum.mainservice.exception.IncorrectObjectException;
+import ru.practicum.mainservice.exception.ObjectNotFoundException;
 import ru.practicum.mainservice.exception.WrongConditionException;
 import ru.practicum.mainservice.user.model.User;
 import ru.practicum.mainservice.user.repository.UserRepository;
 import ru.practicum.mainservice.util.*;
+import ru.practicum.stats.client.StatsClient;
+import ru.practicum.stats.dto.StatDto;
+import ru.practicum.stats.dto.StatOutputDto;
 
+import javax.servlet.http.HttpServletRequest;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
@@ -35,10 +42,12 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final CompilationEventRepository compilationEventRepository;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final StatsClient statsClient = new StatsClient("http://stats-server:9090");
 
     @Override
     public EventFullDto createEvent(NewEventDto newEventDto, Long userId)
-            throws IncorrectFieldException, IncorrectObjectException {
+            throws IncorrectObjectException, WrongConditionException {
         final Long categoryId = newEventDto.getCategory();
         eventChecker.isEventDateBeforeTwoHours(newEventDto.getEventDate());
         userChecker.checkUserExists(userId);
@@ -53,42 +62,37 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto updateEvent(UpdateEventUserRequestDto updateEventUserRequestDto, Long userId)
-            throws IncorrectObjectException, IncorrectFieldException, WrongConditionException {
-        final Long eventId = updateEventUserRequestDto.getEventId();
-        final Long categoryId = updateEventUserRequestDto.getCategory();
+    public EventFullDto updateEvent(UpdateEventRequestDto requestDto, Long userId, Long eventId)
+            throws IncorrectObjectException, IncorrectFieldException, WrongConditionException, ru.practicum.mainservice.exception.ObjectNotFoundException {
+        Event event = eventRepository.getReferenceById(eventId);
+        StateAction stateAction = requestDto.getStateAction();
         userChecker.checkUserExists(userId);
         eventChecker.eventExist(eventId);
         eventChecker.eventInitiator(eventId, userId);
-        categoryChecker.categoryExist(categoryId);
-        eventChecker.eventPublishedState(eventId);
-        eventChecker.isEventDateBeforeTwoHours(updateEventUserRequestDto.getEventDate());
-        final Event event = eventRepository.getReferenceById(eventId);
-        event.setAnnotation(updateEventUserRequestDto.getAnnotation());
-        event.setCategory(categoryRepository.getReferenceById(updateEventUserRequestDto.getCategory()));
-        event.setDescription(updateEventUserRequestDto.getDescription());
-        event.setEventDate(updateEventUserRequestDto.getEventDate());
-        event.setPaid(updateEventUserRequestDto.getPaid());
-        event.setParticipantLimit(updateEventUserRequestDto.getParticipantLimit());
-        event.setTitle(updateEventUserRequestDto.getTitle());
-        if (event.getState().equals(State.CANCELLING)) {
-            event.setState(State.PENDING);
+
+        if (requestDto.getStateAction() != null) {
+            eventChecker.eventPublished(event);
+            if (event.getState().equals(State.CANCELED) && stateAction.equals(StateAction.SEND_TO_REVIEW)) {
+                event.setState(State.PENDING);
+                return eventMapper.toEventFullDto(eventRepository.save(event));
+            }
+            updateFields(event, requestDto);
         }
         return eventMapper.toEventFullDto(eventRepository.save(event));
     }
 
     @Override
-    public EventFullDto cancelEvent(Long userId, Long eventId) throws IncorrectObjectException, IncorrectFieldException {
+    public EventFullDto cancelEvent(Long userId, Long eventId) throws IncorrectObjectException, IncorrectFieldException, ru.practicum.mainservice.exception.ObjectNotFoundException {
         userChecker.checkUserExists(userId);
         eventChecker.eventExist(eventId);
         eventChecker.eventInitiator(eventId, userId);
         Event event = eventRepository.getReferenceById(eventId);
-        event.setState(State.CANCELLING);
+        event.setState(State.PENDING);
         return eventMapper.toEventFullDto(eventRepository.save(event));
     }
 
     @Override
-    public EventFullDto getEventByInitiator(Long userId, Long eventId) throws IncorrectObjectException, IncorrectFieldException {
+    public EventFullDto getEventByInitiator(Long userId, Long eventId) throws IncorrectObjectException, IncorrectFieldException, ru.practicum.mainservice.exception.ObjectNotFoundException {
         userChecker.checkUserExists(userId);
         eventChecker.eventExist(eventId);
         eventChecker.eventInitiatorIsNot(eventId, userId);
@@ -111,11 +115,11 @@ public class EventServiceImpl implements EventService {
                                          Boolean onlyAvailable,
                                          ru.practicum.mainservice.util.EventSort sort,
                                          int from,
-                                         int size) {
+                                         int size,
+                                         HttpServletRequest request) throws WrongConditionException, URISyntaxException {
         eventChecker.checkCorrectParams(from, size);
         LocalDateTime startTime;
         LocalDateTime endTime;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         if (rangeStart == null) {
             startTime = LocalDateTime.now();
         } else {
@@ -125,6 +129,9 @@ public class EventServiceImpl implements EventService {
             endTime = LocalDateTime.now().plusYears(100);
         } else {
             endTime = LocalDateTime.parse(rangeEnd, formatter);
+        }
+        if (startTime.isAfter(endTime)) {
+            throw new WrongConditionException("Wrong condition of ranges");
         }
         List<Event> events;
         if (categories == null) {
@@ -152,57 +159,47 @@ public class EventServiceImpl implements EventService {
                 events = events.stream().sorted(Comparator.comparing(Event::getViews)).collect(Collectors.toList());
             }
         }
+        statsClient.post(new StatDto("event-service", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now()));
+
+        addViewsForEvents(events);
         return eventMapper.toListOfEventShortDto(events);
     }
 
     @Override
-    public EventFullDto getEventById(Long eventId) throws IncorrectObjectException {
-        eventChecker.eventExist(eventId);
-        return eventMapper.toEventFullDto(eventRepository.getByIdPublished(eventId));
+    public EventFullDto getEventById(Long eventId, HttpServletRequest request) throws URISyntaxException, ObjectNotFoundException {
+        final Event event = eventRepository.getByIdPublished(eventId);
+        if (event != null) {
+            statsClient.post(new StatDto("event-service", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now()));
+            event.setViews(getViews(event));
+            return eventMapper.toEventFullDto(event);
+        } else throw new ObjectNotFoundException("Event not found");
     }
 
     @Override
-    public EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequestDto updateEventAdminRequest) throws IncorrectObjectException, IncorrectFieldException {
+    public EventFullDto updateEventByAdmin(Long eventId, UpdateEventRequestDto requestDto)
+            throws WrongConditionException, ru.practicum.mainservice.exception.ObjectNotFoundException, IncorrectFieldException {
         eventChecker.eventExist(eventId);
-        Event event = eventRepository.getById(eventId);
-        eventChecker.isEventDateBeforeTwoHours(event.getEventDate());
-        Category category = categoryRepository.getById(updateEventAdminRequest.getCategory());
-        if (updateEventAdminRequest.getAnnotation() != null) {
-            event.setAnnotation(updateEventAdminRequest.getAnnotation());
+        if (requestDto.getEventDate() != null) {
+            eventChecker.isEventDateBeforeTwoHours(requestDto.getEventDate());
         }
-        if (updateEventAdminRequest.getCategory() != null) {
-            event.setCategory(category);
+        final Event event = eventRepository.getReferenceById(eventId);
+        eventChecker.statusForAdminUpdate(event, requestDto);
+        if (requestDto.getStateAction() != null) {
+            if (requestDto.getStateAction().equals(StateAction.REJECT_EVENT)) {
+                event.setState(State.CANCELED);
+                eventRepository.save(event);
+                return eventMapper.toEventFullDto(eventRepository.save(event));
+            }
         }
-        if (updateEventAdminRequest.getDescription() != null) {
-            event.setDescription(updateEventAdminRequest.getDescription());
-        }
-        if (updateEventAdminRequest.getEventDate() != null) {
-            event.setEventDate(updateEventAdminRequest.getEventDate());
-        }
-        if (updateEventAdminRequest.getLocation() != null) {
-            event.setLat(updateEventAdminRequest.getLocation().getLat());
-            event.setLon(updateEventAdminRequest.getLocation().getLon());
-        }
-        if (updateEventAdminRequest.getPaid() != null) {
-            event.setPaid(updateEventAdminRequest.getPaid());
-        }
-        if (updateEventAdminRequest.getParticipantLimit() != null) {
-            event.setParticipantLimit(updateEventAdminRequest.getParticipantLimit());
-        }
-        if (updateEventAdminRequest.getRequestModeration() != null) {
-            event.setRequestModeration(updateEventAdminRequest.getRequestModeration());
-        }
-        if (updateEventAdminRequest.getTitle() != null) {
-            event.setTitle(updateEventAdminRequest.getTitle());
-        }
-        event.setState(State.PENDING);
-
+        updateFields(event, requestDto);
+        event.setState(State.PUBLISHED);
+        event.setViews(getViews(event));
         return eventMapper.toEventFullDto(eventRepository.save(event));
     }
 
     @Override
     public EventFullDto publishEventByAdmin(Long eventId)
-            throws IncorrectObjectException, WrongConditionException {
+            throws WrongConditionException, ru.practicum.mainservice.exception.ObjectNotFoundException {
         eventChecker.eventExist(eventId);
         Event event = eventRepository.getReferenceById(eventId);
         if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
@@ -217,7 +214,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto rejectEventByAdmin(Long eventId)
-            throws IncorrectObjectException, WrongConditionException {
+            throws WrongConditionException, ru.practicum.mainservice.exception.ObjectNotFoundException {
         eventChecker.eventExist(eventId);
         Event event = eventRepository.getById(eventId);
         if (!event.getState().equals(State.PENDING)) {
@@ -229,38 +226,36 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventFullDto> getEventsByAdmin(List<Long> users,
-                                               List<String> states,
+                                               List<State> states,
                                                List<Long> categories,
                                                String rangeStart,
                                                String rangeEnd,
                                                int from,
                                                int size) {
-        eventChecker.checkCorrectParams(from, size);
-        LocalDateTime startTime;
-        LocalDateTime endTime;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        if (rangeStart == null) {
-            startTime = LocalDateTime.now();
+        Pageable pageable = PageRequest.of(from, size);
+        List<Event> events;
+        if (rangeStart != null & rangeEnd != null) {
+            LocalDateTime startEvens = LocalDateTime.parse(rangeStart, formatter);
+            LocalDateTime endEvens = LocalDateTime.parse(rangeEnd, formatter);
+            events = eventRepository.findEventsByInitiatorIdInAndStateInAndCategoryIdInAndEventDateIsAfterAndEventDateIsBefore(
+                    users,
+                    states,
+                    categories,
+                    startEvens,
+                    endEvens,
+                    pageable);
         } else {
-            startTime = LocalDateTime.parse(rangeStart, formatter);
+            if (users != null) {
+                events = eventRepository.findAllByCategoryIdInAndEventDateIsAfter(categories, LocalDateTime.now(), pageable);
+                return eventMapper.toListOfEventFullDto(events);
+            }
+            if (categories != null) {
+                events = eventRepository.findAllByStateInAndEventDateIsAfter(states, LocalDateTime.now(), pageable);
+            } else {
+                events = eventRepository.findAllByEventDateIsAfter(LocalDateTime.now(), pageable);
+            }
         }
-        if (rangeStart == null) {
-            endTime = LocalDateTime.now().plusYears(100);
-        } else {
-            endTime = LocalDateTime.parse(rangeEnd, formatter);
-        }
-
-        List<State> eventStates = null;
-        if (states != null) {
-            eventStates = states.stream().map(State::valueOf).collect(Collectors.toList());
-        }
-
-        List<Event> events = eventRepository.findEventsByManyParamsByAdmin(
-                users, eventStates, categories, startTime, endTime);
-        if (events.size() < size) {
-            size = events.size();
-        }
-        return eventMapper.toListOfEventFullDto(events.subList(from, from/size));
+        return eventMapper.toListOfEventFullDto(events);
     }
 
     @Override
@@ -269,19 +264,45 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toListOfEventShortDto(eventRepository.getAllByIds(eventsIds));
     }
 
-    @Override
-    public void addViewsForEvents(List<EventShortDto> eventsShortDtos) {
-        for (EventShortDto eventShortDto : eventsShortDtos) {
-            Event event = eventRepository.getById(eventShortDto.getId());
-            event.setViews(event.getViews() + 1);
+    private void addViewsForEvents(List<Event> events) {
+        for (Event event : events) {
+            event.setViews(getViews(event));
             eventRepository.save(event);
         }
     }
 
-    @Override
-    public void addViewForEvent(EventFullDto eventFullDto) {
-        Event event = eventRepository.getById(eventFullDto.getId());
-        event.setViews(event.getViews() + 1);
-        eventRepository.save(event);
+    private Long getViews(Event event) {
+        String eventUri = "/events/" + event.getId();
+        List<StatOutputDto> stats = statsClient.get(null, null, List.of(eventUri), true);
+        return stats.isEmpty() ? 0 : stats.get(0).getHits();
+    }
+
+    private void updateFields(Event event, UpdateEventRequestDto requestDto) throws WrongConditionException {
+        if (requestDto.getStateAction() != null) {
+        if (requestDto.getStateAction().equals(StateAction.CANCEL_REVIEW)) event.setState(State.CANCELED);
+        if (requestDto.getStateAction().equals(StateAction.PUBLISH_EVENT)) event.setState(State.PUBLISHED);
+    }
+        if (requestDto.getAnnotation() != null) {
+            event.setAnnotation(requestDto.getAnnotation());
+        }
+        if (requestDto.getEventDate() != null) {
+            eventChecker.isEventDateBeforeTwoHours(requestDto.getEventDate());
+            event.setEventDate(requestDto.getEventDate());
+        }
+        if (requestDto.getCategory() != null) {
+            event.setCategory(categoryRepository.getReferenceById(requestDto.getCategory()));
+        }
+        if (requestDto.getDescription() != null) {
+            event.setDescription(requestDto.getDescription());
+        }
+        if (requestDto.getPaid() != null) {
+            event.setPaid(requestDto.getPaid());
+        }
+        if (requestDto.getParticipantLimit() != null) {
+            event.setParticipantLimit(requestDto.getParticipantLimit());
+        }
+        if (requestDto.getTitle() != null) {
+            event.setTitle(requestDto.getTitle());
+        }
     }
 }
