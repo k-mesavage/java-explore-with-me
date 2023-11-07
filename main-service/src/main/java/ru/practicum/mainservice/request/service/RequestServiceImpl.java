@@ -11,7 +11,7 @@ import ru.practicum.mainservice.exception.WrongConditionException;
 import ru.practicum.mainservice.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.mainservice.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.mainservice.request.dto.ParticipationRequestDto;
-import ru.practicum.mainservice.request.mapper.ParticipationMapper;
+import ru.practicum.mainservice.request.mapper.RequestMapper;
 import ru.practicum.mainservice.request.model.ParticipationRequest;
 import ru.practicum.mainservice.request.repository.ParticipationRepository;
 import ru.practicum.mainservice.user.repository.UserRepository;
@@ -19,11 +19,10 @@ import ru.practicum.mainservice.util.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static java.lang.Boolean.FALSE;
+import static ru.practicum.mainservice.util.State.CONFIRMED;
+import static ru.practicum.mainservice.util.State.PENDING;
 
 @Service
 @RequiredArgsConstructor
@@ -36,81 +35,52 @@ public class RequestServiceImpl implements RequestService {
     private final EventChecker eventChecker;
     private final RequestChecker requestChecker;
     private final StatusChecker statusChecker;
-    private final ParticipationMapper mapper;
+    private final RequestMapper mapper;
+    private final ParticipationRepository repository;
 
     @Override
     public ParticipationRequestDto createRequest(Long userId, Long eventId)
-            throws IncorrectObjectException, IncorrectFieldException, WrongConditionException, ObjectNotFoundException {
+            throws IncorrectObjectException, WrongConditionException, ObjectNotFoundException {
         userChecker.checkUserExists(userId);
         eventChecker.eventExist(eventId);
         requestChecker.requestAlreadyExist(userId, eventId);
-        eventChecker.eventInitiatorIsNot(eventId, userId);
         eventChecker.eventPublishedState(eventId);
         eventChecker.checkEventLimit(eventId);
         ParticipationRequest request = new ParticipationRequest();
         request.setRequester(userRepository.getById(userId));
         request.setEvent(eventRepository.getById(eventId));
         request.setCreated(LocalDateTime.now());
-        request.setStatus(State.CONFIRMED);
+        request.setStatus(PENDING);
         return mapper.toDto(participationRepository.save(request));
     }
 
     @Override
-    public EventRequestStatusUpdateResult changeRequestStatus(EventRequestStatusUpdateRequest request, Long userId, Long eventId)
-            throws IncorrectObjectException, IncorrectFieldException {
-        final State newStatus = request.getStatus();
-        userChecker.checkUserExists(userId);
-        final Event event = eventRepository.getReferenceById(eventId);
-        eventChecker.eventInitiator(eventId, userId);
-        final List<Long> requestIds = request.getRequestIds();
-        final int participantLimit = event.getParticipantLimit();
-        int currentConfirmed = event.getConfirmedRequests();
-        final Boolean isRequestModeration = event.getRequestModeration();
-        if (participantLimit > 0 && participantLimit == currentConfirmed) {
-            throw new IncorrectFieldException("The limit on confirmations");
-        }
-        final List<ParticipationRequest> requestList = participationRepository.findAllByIdInAndStatus(requestIds, State.PENDING);
-        if (requestList.size() != requestIds.size()) {
-            throw new IncorrectFieldException("Some request is not a PENDING");
-        }
-        final List<ParticipationRequestDto> confirmedDto = new ArrayList<>();
-        final List<ParticipationRequestDto> rejectedList = new ArrayList<>();
-        statusChecker.checkStatus(newStatus);
-        if (State.REJECTED.equals(newStatus)) {
-            requestList.forEach(r -> r.setStatus(State.REJECTED));
-            rejectedList.addAll(requestList.stream()
-                    .map(mapper::toDto).collect(Collectors.toList()));
-        }
-        if (State.CONFIRMED.equals(newStatus)) {
-            if ((participantLimit == 0) || FALSE.equals(isRequestModeration)) {
-                requestList.forEach(r -> r.setStatus(State.CONFIRMED));
-                final List<ParticipationRequestDto> confirmedList = requestList.stream()
-                        .map(mapper::toDto)
-                        .collect(Collectors.toList());
-                participationRepository.saveAll(requestList);
-                return new EventRequestStatusUpdateResult(confirmedList, Collections.emptyList());
+    public EventRequestStatusUpdateResult patchRequest(EventRequestStatusUpdateRequest updateRequest, Long userId, Long eventId)
+            throws IncorrectFieldException {
+        List<ParticipationRequest> requests = repository.findByIdIn(updateRequest.getRequestIds());
+        for (ParticipationRequest r : requests) {
+            if (r.getStatus().equals(State.CONFIRMED)) {
+                throw new IncorrectFieldException("Incorrect state");
             }
-            for (ParticipationRequest r : requestList) {
-                if (currentConfirmed < participantLimit) {
-                    r.setStatus(State.CONFIRMED);
-                    currentConfirmed++;
-                } else {
-                    r.setStatus(State.REJECTED);
-                }
-            }
-            event.setConfirmedRequests(currentConfirmed);
-            eventRepository.save(event);
-            confirmedDto.addAll(requestList.stream()
-                    .filter(RequestServiceImpl::isConfirmedRequest)
-                    .map(mapper::toDto)
-                    .collect(Collectors.toList()));
-            rejectedList.addAll(requestList.stream()
-                    .filter(RequestServiceImpl::isRejectedRequest)
-                    .map(mapper::toDto)
-                    .collect(Collectors.toList()));
+            r.setStatus(updateRequest.getStatus());
         }
-        participationRepository.saveAll(requestList);
-        return new EventRequestStatusUpdateResult(confirmedDto, rejectedList);
+        return createUpdateResult(requests);
+    }
+
+    private EventRequestStatusUpdateResult createUpdateResult(List<ParticipationRequest> requests) {
+        EventRequestStatusUpdateResult result = new EventRequestStatusUpdateResult();
+        List<ParticipationRequestDto> confirmedRequests = new ArrayList<>();
+        List<ParticipationRequestDto> rejectedRequests = new ArrayList<>();
+        for (ParticipationRequest r: requests) {
+            if (r.getStatus().equals(State.CONFIRMED)) {
+                confirmedRequests.add(mapper.toDto(r));
+            } else {
+                rejectedRequests.add(mapper.toDto(r));
+            }
+        }
+        result.setConfirmedRequests(confirmedRequests);
+        result.setRejectedRequests(rejectedRequests);
+        return result;
     }
 
     @Override
@@ -136,11 +106,10 @@ public class RequestServiceImpl implements RequestService {
         userChecker.checkUserExists(userId);
         eventChecker.eventExist(eventId);
         requestChecker.requestExists(reqId);
-        eventChecker.eventInitiator(eventId, userId);
         requestChecker.correctEventRequest(eventId, reqId);
         requestChecker.reConfirmed(reqId);
         ParticipationRequest request = participationRepository.getById(reqId);
-        request.setStatus(State.CONFIRMED);
+        request.setStatus(CONFIRMED);
         Event event = eventRepository.getById(eventId);
         event.setConfirmedRequests(event.getConfirmedRequests() + 1);
         eventRepository.save(event);
@@ -185,7 +154,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private static boolean isConfirmedRequest(ParticipationRequest r) {
-        return State.CONFIRMED.equals(r.getStatus());
+        return CONFIRMED.equals(r.getStatus());
     }
 
     private static boolean isRejectedRequest(ParticipationRequest r) {

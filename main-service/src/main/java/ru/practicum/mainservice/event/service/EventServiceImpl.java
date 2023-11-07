@@ -98,16 +98,17 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getEventByInitiator(Long userId, Long eventId) throws IncorrectObjectException, IncorrectFieldException, ru.practicum.mainservice.exception.ObjectNotFoundException {
         userChecker.checkUserExists(userId);
         eventChecker.eventExist(eventId);
-        eventChecker.eventInitiatorIsNot(eventId, userId);
+        eventChecker.eventInitiator(eventId, userId);
         Event event = eventRepository.findAllByInitiatorIdAndId(userId, eventId);
         event.setViews(event.getViews());
         return eventMapper.toEventFullDto(event);
     }
 
     @Override
-    public List<EventFullDto> getEventsByInitiator(Long userId, int from, int size) throws IncorrectObjectException {
+    public List<EventFullDto> getEventsByInitiator(Long userId, int from, int size, HttpServletRequest request) throws IncorrectObjectException {
         userChecker.checkUserExists(userId);
         eventChecker.checkCorrectParams(from, size);
+        statsClient.saveHit("/hit", getStatsDtoToSave(request));
         return eventMapper.toListOfEventFullDto(eventRepository.findAllByInitiatorId(userId, PageRequest.of(from, size)));
     }
 
@@ -164,16 +165,17 @@ public class EventServiceImpl implements EventService {
                 events = events.stream().sorted(Comparator.comparing(Event::getViews)).collect(Collectors.toList());
             }
         }
-        List<Event> eventsWithViews = getEventViewsList(events);
         statsClient.saveHit("/hit", getStatsDtoToSave(request));
+        List<Event> eventsWithViews = getEventViewsList(events);
         return eventMapper.toListOfEventShortDto(eventsWithViews);
     }
 
     @Override
-    public EventFullDto getEventById(Long eventId, HttpServletRequest request) throws URISyntaxException, ObjectNotFoundException {
+    public EventFullDto getEventById(Long eventId, HttpServletRequest request) throws ObjectNotFoundException {
         final List<Event> events = eventRepository.getByIdPublished(eventId);
         if (!events.isEmpty()) {
             List<Event> eventsWithViews = getEventViewsList(events);
+            statsClient.saveHit("/hit", getStatsDtoToSave(request));
             addViewsForEvents(eventsWithViews);
             return eventMapper.toEventFullDto(eventsWithViews.get(0));
         } else throw new ObjectNotFoundException("Event not found");
@@ -265,6 +267,7 @@ public class EventServiceImpl implements EventService {
     public List<EventShortDto> getEventsByCompilationId(Long compilationId) {
         List<Long> eventsIds = compilationEventRepository.getCompilationEventIds(compilationId);
         return eventMapper.toListOfEventShortDto(eventRepository.getAllByIds(eventsIds));
+
     }
 
     private StatDto getStatsDtoToSave(HttpServletRequest request) {
@@ -285,11 +288,6 @@ public class EventServiceImpl implements EventService {
                 from == null ? 0 : from,
                 size == null ? 10 : size
         );
-    }
-
-    private void addViewForEvent(Event event) {
-        event.setViews(event.getViews() + 1);
-        eventRepository.save(event);
     }
 
     private void addViewsForEvents(List<Event> events) {

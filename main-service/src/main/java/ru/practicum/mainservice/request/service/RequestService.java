@@ -13,7 +13,7 @@ import java.util.List;
 public interface RequestService {
 
     ParticipationRequestDto createRequest(Long userId, Long eventId) throws IncorrectObjectException, IncorrectFieldException, WrongConditionException, ObjectNotFoundException;
-    EventRequestStatusUpdateResult changeRequestStatus(EventRequestStatusUpdateRequest request, Long userId, Long eventId) throws IncorrectObjectException, IncorrectFieldException;
+    EventRequestStatusUpdateResult patchRequest(EventRequestStatusUpdateRequest request, Long userId, Long eventId) throws IncorrectObjectException, IncorrectFieldException, ObjectNotFoundException;
     ParticipationRequestDto cancelRequest(Long userId, Long requestId) throws IncorrectObjectException, IncorrectFieldException, WrongConditionException;
     List<ParticipationRequestDto> getRequestsByRequesterId(Long userId) throws IncorrectObjectException;
     ParticipationRequestDto confirmRequestByInitiator(Long initiatorId, Long eventId, Long reqId) throws IncorrectObjectException, IncorrectFieldException, WrongConditionException, ObjectNotFoundException;

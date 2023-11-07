@@ -8,10 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class ParticipationMapper {
+public class RequestMapper {
 
     public ParticipationRequestDto toDto(ParticipationRequest request) {
-        return new ParticipationRequestDto(request.getId(),
+        return new ParticipationRequestDto(
+                request.getId(),
                 request.getRequester().getId(),
                 request.getEvent().getId(),
                 request.getCreated(),

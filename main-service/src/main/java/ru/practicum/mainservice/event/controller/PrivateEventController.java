@@ -15,6 +15,7 @@ import ru.practicum.mainservice.exception.WrongConditionException;
 import ru.practicum.mainservice.request.dto.ParticipationRequestDto;
 import ru.practicum.mainservice.request.service.RequestService;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.sql.SQLException;
 import java.util.List;
@@ -65,8 +66,9 @@ public class PrivateEventController {
     @GetMapping
     public List<EventFullDto> getEventsByInitiator(@PathVariable Long userId,
                                                    @RequestParam(defaultValue = "0") int from,
-                                                   @RequestParam(defaultValue = "10") int size) throws IncorrectObjectException {
-        return eventService.getEventsByInitiator(userId, from, size);
+                                                   @RequestParam(defaultValue = "10") int size,
+                                                   HttpServletRequest request) throws IncorrectObjectException {
+        return eventService.getEventsByInitiator(userId, from, size, request);
     }
 
     @PatchMapping("/{eventId}/requests/{reqId}/confirm")

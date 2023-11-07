@@ -53,7 +53,7 @@ public class EventChecker {
 
     public void eventInitiatorIsNot(Long eventId, Long userId) throws IncorrectFieldException {
         if (Objects.equals(eventRepository.getById(eventId).getInitiator().getId(), userId)) {
-            throw new IncorrectFieldException("User id = " + userId + " is not initiator of event id = " + eventId);
+            throw new IncorrectFieldException("User id = " + userId + " is initiator of event id = " + eventId);
         }
     }
 

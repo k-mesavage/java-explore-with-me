@@ -2,6 +2,7 @@ package ru.practicum.mainservice.event.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpRequest;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.mainservice.event.dto.EventFullDto;
 import ru.practicum.mainservice.event.dto.EventShortDto;
@@ -34,11 +35,11 @@ public class PublicEventController {
             @RequestParam(required = false) EventSort sort,
             @RequestParam(defaultValue = "0") int from,
             @RequestParam(defaultValue = "10") int size,
-            HttpServletRequest httpServletRequest) throws WrongConditionException, URISyntaxException {
+            HttpServletRequest httpRequest) throws WrongConditionException, URISyntaxException {
 
         log.info("Public get all events");
         return eventService.getEvents(
-                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, httpServletRequest);
+                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, httpRequest);
     }
 
     @GetMapping("/{eventId}")

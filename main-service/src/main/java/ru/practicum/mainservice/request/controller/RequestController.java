@@ -37,9 +37,9 @@ public class RequestController {
     public EventRequestStatusUpdateResult changeRequestStatus(@Valid @RequestBody EventRequestStatusUpdateRequest request,
                                                               @PathVariable(value = "userId") long userId,
                                                               @PathVariable(value = "eventId") long eventId)
-            throws IncorrectObjectException, IncorrectFieldException {
+            throws IncorrectObjectException, IncorrectFieldException, ObjectNotFoundException {
         log.info("Path request status");
-        return service.changeRequestStatus(request, userId, eventId);
+        return service.patchRequest(request, userId, eventId);
     }
 
     @PatchMapping("/requests/{requestId}/cancel")

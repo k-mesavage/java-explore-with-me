@@ -23,7 +23,7 @@ public interface EventService {
 
     EventFullDto getEventByInitiator(Long userId, Long eventId) throws IncorrectObjectException, IncorrectFieldException, ObjectNotFoundException;
 
-    List<EventFullDto> getEventsByInitiator(Long userId, int from, int size) throws IncorrectObjectException;
+    List<EventFullDto> getEventsByInitiator(Long userId, int from, int size, HttpServletRequest request) throws IncorrectObjectException;
 
     List<EventShortDto> getEvents(String text,
                                   List<Long> categories,
