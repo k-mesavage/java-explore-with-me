@@ -53,7 +53,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto createEvent(NewEventDto newEventDto, Long userId)
-            throws IncorrectObjectException, WrongConditionException {
+            throws IncorrectObjectException, WrongConditionException, ObjectNotFoundException {
         final Long categoryId = newEventDto.getCategory();
         eventChecker.isEventDateBeforeTwoHours(newEventDto.getEventDate());
         userChecker.checkUserExists(userId);
@@ -70,7 +70,8 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto updateEvent(UpdateEventRequestDto requestDto, Long userId, Long eventId)
             throws IncorrectObjectException, IncorrectFieldException, WrongConditionException, ru.practicum.mainservice.exception.ObjectNotFoundException {
-        Event event = eventRepository.getReferenceById(eventId);
+        Event event = eventRepository.findById(eventId).orElseThrow();
+        eventChecker.notPublished(event.getState());
         StateAction stateAction = requestDto.getStateAction();
         userChecker.checkUserExists(userId);
         eventChecker.eventExist(eventId);

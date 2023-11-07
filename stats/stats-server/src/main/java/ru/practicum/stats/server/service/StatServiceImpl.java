@@ -8,7 +8,6 @@ import ru.practicum.stats.dto.StatOutputDto;
 import ru.practicum.stats.server.mapper.StatMapper;
 import ru.practicum.stats.server.model.Stat;
 import ru.practicum.stats.server.repository.StatServerRepository;
-import ru.practicum.stats.server.validation.DateValidator;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;

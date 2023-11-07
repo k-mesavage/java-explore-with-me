@@ -45,7 +45,7 @@ public class ErrorHandler {
         return new ApiError(List.of(Arrays.toString(exception.getStackTrace())),
                 exception.getMessage(),
                 "WRONG CONDITION",
-                "RAD REQUEST",
+                "BAD REQUEST",
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
 }

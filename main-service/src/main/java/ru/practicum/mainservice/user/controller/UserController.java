@@ -7,10 +7,11 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.mainservice.exception.IncorrectFieldException;
 import ru.practicum.mainservice.user.dto.NewUserRequest;
 import ru.practicum.mainservice.user.dto.UserDto;
-import ru.practicum.mainservice.user.model.User;
 import ru.practicum.mainservice.user.service.UserService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @Slf4j
@@ -23,8 +24,8 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<List<UserDto>> getUsers(@RequestParam(name = "ids", required = false) List<Long> ids,
-                                               @RequestParam(name = "from", defaultValue = "0") int from,
-                                               @RequestParam(name = "size", defaultValue = "10") int size) {
+                                                  @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") int from,
+                                                  @Positive @RequestParam(name = "size", defaultValue = "10") int size) {
         log.info("Try get users which ids {}", ids);
         return ResponseEntity.ok().body(service.getUsers(ids, from, size));
     }

@@ -54,46 +54,37 @@ public class EventChecker {
     }
 
     public void eventInitiatorIsNot(Long eventId, Long userId) throws IncorrectFieldException {
-        if (Objects.equals(eventRepository.getById(eventId).getInitiator().getId(), userId)) {
+        if (Objects.equals(eventRepository.getReferenceById(eventId).getInitiator().getId(), userId)) {
             throw new IncorrectFieldException("User id = " + userId + " is initiator of event id = " + eventId);
         }
     }
 
     public void eventInitiator(Long eventId, Long userId) throws IncorrectFieldException {
-        if (!Objects.equals(eventRepository.getById(eventId).getInitiator().getId(), userId)) {
+        if (!Objects.equals(eventRepository.getReferenceById(eventId).getInitiator().getId(), userId)) {
             throw new IncorrectFieldException("User id = " + userId + " is not initiator of event id = " + eventId);
         }
     }
 
-    public void eventPublishedState(Long eventId) throws WrongConditionException {
+    public void eventPublishedState(Long eventId) throws IncorrectFieldException {
         Event event = eventRepository.getById(eventId);
         if (!event.getState().equals(State.PUBLISHED)) {
-            throw new WrongConditionException("It is impossible to create a request to not PUBLISHED event");
+            throw new IncorrectFieldException("It is impossible to create a request to not PUBLISHED event");
         }
     }
 
-    public void eventPendingState(Long eventId) throws WrongConditionException {
-        Event event = eventRepository.getById(eventId);
-        State state = event.getState();
-        if (!state.equals(State.PENDING)) {
-            throw new WrongConditionException("Event in state " + state + " cannot be changed");
+    public void notPublished(State state) throws IncorrectFieldException {
+        if (state.equals(State.PUBLISHED)) {
+            throw new IncorrectFieldException("Event in state " + state + " cannot be changed");
         }
     }
 
-    public void checkEventLimit(Long eventId) throws WrongConditionException {
-        Event event = eventRepository.getById(eventId);
+    public void checkEventLimit(Long eventId) throws IncorrectFieldException {
+        Event event = eventRepository.getReferenceById(eventId);
         if (event.getParticipantLimit() != 0) {
             int spareParticipantSlots = event.getParticipantLimit() - event.getConfirmedRequests();
             if (spareParticipantSlots == 0) {
-                throw new WrongConditionException("Participants limit for this event has been reached");
+                throw new IncorrectFieldException("Participants limit for this event has been reached");
             }
-        }
-    }
-
-    public void checkNullLimitOrNotPreModeration(Long eventId) throws WrongConditionException {
-        Event event = eventRepository.getById(eventId);
-        if (event.getParticipantLimit() == 0 || !event.getRequestModeration()) {
-            throw new WrongConditionException("No CONFIRM for this request is needed");
         }
     }
 

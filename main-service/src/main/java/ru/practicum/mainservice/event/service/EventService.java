@@ -15,7 +15,7 @@ import java.util.List;
 
 public interface EventService {
 
-    EventFullDto createEvent(NewEventDto newEventDto, Long userId) throws IncorrectObjectException, SQLException, WrongConditionException;
+    EventFullDto createEvent(NewEventDto newEventDto, Long userId) throws IncorrectObjectException, SQLException, WrongConditionException, ObjectNotFoundException;
 
     EventFullDto updateEvent(UpdateEventRequestDto updateEventUserRequestDto, Long userId, Long eventId) throws IncorrectObjectException, IncorrectFieldException, WrongConditionException, ObjectNotFoundException;
 

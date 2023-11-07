@@ -20,29 +20,29 @@ public class RequestChecker {
     private final ParticipationRepository repository;
 
     public void pending(Long reqId) throws WrongConditionException {
-        final ParticipationRequest request = repository.getById(reqId);
+        final ParticipationRequest request = repository.getReferenceById(reqId);
         if (!request.getStatus().equals(State.PENDING)) {
             throw new WrongConditionException("Only request in status PENDING can be rejected");
         }
     }
 
     public void reConfirmed(Long reqId) throws WrongConditionException {
-        final ParticipationRequest request = repository.getById(reqId);
+        final ParticipationRequest request = repository.getReferenceById(reqId);
         if (request.getStatus().equals(State.CONFIRMED)) {
             throw new WrongConditionException("Request in already in status CONFIRMED");
         }
     }
 
     public void correctEventRequest(Long eventId, Long reqId) throws IncorrectFieldException {
-        final ParticipationRequest request = repository.getById(reqId);
+        final ParticipationRequest request = repository.getReferenceById(reqId);
         if (!Objects.equals(request.getEvent().getId(), eventId)) {
             throw new IncorrectFieldException("Incorrect event request");
         }
     }
 
-    public void requestAlreadyExist(Long userId, Long eventId) {
+    public void requestAlreadyExist(Long userId, Long eventId) throws IncorrectFieldException {
         if (repository.existsByRequesterIdAndEventId(userId, eventId)) {
-            throw new IllegalArgumentException("Request already exist");
+            throw new IncorrectFieldException("Request already exist");
         }
     }
 

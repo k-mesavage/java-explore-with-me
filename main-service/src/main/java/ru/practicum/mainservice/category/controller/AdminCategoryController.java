@@ -9,6 +9,7 @@ import ru.practicum.mainservice.category.dto.NewCategoryDto;
 import ru.practicum.mainservice.category.service.CategoryService;
 import ru.practicum.mainservice.exception.IncorrectFieldException;
 import ru.practicum.mainservice.exception.IncorrectObjectException;
+import ru.practicum.mainservice.exception.ObjectNotFoundException;
 
 import javax.validation.Valid;
 
@@ -31,13 +32,14 @@ public class AdminCategoryController {
     @PatchMapping("/{catId}")
     public CategoryDto updateCategory(@PathVariable Long catId,
             @RequestBody @Valid CategoryDto categoryDto)
-            throws IncorrectObjectException, IncorrectFieldException {
+            throws IncorrectObjectException, IncorrectFieldException, ObjectNotFoundException {
         log.info("Update category {}", categoryDto);
         categoryDto = service.updateCategory(catId, categoryDto);
         return categoryDto;
     }
 
     @DeleteMapping("/{catId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCategory(@PathVariable Long catId) throws IncorrectObjectException, IncorrectFieldException {
         log.info("Delete category with id {}", catId);
         service.deleteCategory(catId);

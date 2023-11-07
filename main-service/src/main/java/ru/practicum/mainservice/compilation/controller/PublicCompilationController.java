@@ -7,6 +7,8 @@ import ru.practicum.mainservice.compilation.dto.CompilationDto;
 import ru.practicum.mainservice.compilation.service.CompilationService;
 import ru.practicum.mainservice.exception.IncorrectObjectException;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @Slf4j
@@ -18,9 +20,9 @@ public class PublicCompilationController {
     private final CompilationService service;
 
     @GetMapping
-    public List<CompilationDto> findCompilations(@RequestParam(required = false) Boolean pinned,
-                                                 @RequestParam(defaultValue = "0") Integer from,
-                                                 @RequestParam(defaultValue = "10") Integer size) {
+    public List<CompilationDto> findCompilations(@RequestParam(defaultValue = "false") Boolean pinned,
+                                                 @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+                                                 @Positive @RequestParam(defaultValue = "10") Integer size) {
         log.info("Get compilations to public");
         return service.getAllCompilations(pinned, from, size);
     }

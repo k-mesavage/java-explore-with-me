@@ -17,6 +17,8 @@ import ru.practicum.mainservice.request.service.RequestService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -33,7 +35,7 @@ public class PrivateEventController {
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto addEvent(@PathVariable Long userId,
                                  @Valid @RequestBody NewEventDto newEventDto)
-            throws IncorrectObjectException, SQLException, WrongConditionException {
+            throws IncorrectObjectException, SQLException, WrongConditionException, ObjectNotFoundException {
         log.info("User add event {}", newEventDto);
         return eventService.createEvent(newEventDto, userId);
     }
@@ -65,8 +67,8 @@ public class PrivateEventController {
 
     @GetMapping
     public List<EventFullDto> getEventsByInitiator(@PathVariable Long userId,
-                                                   @RequestParam(defaultValue = "0") int from,
-                                                   @RequestParam(defaultValue = "10") int size,
+                                                   @PositiveOrZero @RequestParam(defaultValue = "0") int from,
+                                                   @Positive @RequestParam(defaultValue = "10") int size,
                                                    HttpServletRequest request) throws IncorrectObjectException {
         return eventService.getEventsByInitiator(userId, from, size, request);
     }

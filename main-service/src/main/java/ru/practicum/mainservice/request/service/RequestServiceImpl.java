@@ -18,7 +18,6 @@ import ru.practicum.mainservice.user.repository.UserRepository;
 import ru.practicum.mainservice.util.*;
 import ru.practicum.mainservice.util.checker.EventChecker;
 import ru.practicum.mainservice.util.checker.RequestChecker;
-import ru.practicum.mainservice.util.checker.StatusChecker;
 import ru.practicum.mainservice.util.checker.UserChecker;
 
 import java.time.LocalDateTime;
@@ -37,45 +36,45 @@ public class RequestServiceImpl implements RequestService {
     private final UserChecker userChecker;
     private final EventChecker eventChecker;
     private final RequestChecker requestChecker;
-    private final StatusChecker statusChecker;
     private final RequestMapper mapper;
     private final ParticipationRepository repository;
 
     @Override
     public ParticipationRequestDto createRequest(Long userId, Long eventId)
-            throws IncorrectObjectException, WrongConditionException, ObjectNotFoundException {
+            throws IncorrectObjectException, ObjectNotFoundException, IncorrectFieldException {
         userChecker.checkUserExists(userId);
         eventChecker.eventExist(eventId);
+        eventChecker.eventInitiatorIsNot(eventId, userId);
         requestChecker.requestAlreadyExist(userId, eventId);
         eventChecker.eventPublishedState(eventId);
         eventChecker.checkEventLimit(eventId);
         ParticipationRequest request = new ParticipationRequest();
-        request.setRequester(userRepository.getById(userId));
+        request.setRequester(userRepository.getReferenceById(userId));
         request.setCreated(LocalDateTime.now());
-        final Event event = eventRepository.getById(eventId);
+        final Event event = eventRepository.getReferenceById(eventId);
         request.setEvent(event);
         if (event.getParticipantLimit() == 0) {
             request.setStatus(CONFIRMED);
         } else {
             request.setStatus(PENDING);
         }
+        event.setConfirmedRequests(event.getConfirmedRequests() + 1);
         return mapper.toDto(participationRepository.save(request));
     }
 
     @Override
     public EventRequestStatusUpdateResult patchRequest(EventRequestStatusUpdateRequest updateRequest, Long userId, Long eventId)
             throws IncorrectFieldException, ObjectNotFoundException {
+        
         userRepository.findById(userId)
                 .orElseThrow(() -> new ObjectNotFoundException("User not found."));
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new ObjectNotFoundException("Event not found"));
-        if (!event.getInitiator().getId().equals(userId)) {
-            throw new IncorrectFieldException("User is no initiator this event");
-        }
+        eventChecker.eventInitiator(eventId, userId);
         if (event.getConfirmedRequests().equals(event.getParticipantLimit())) {
             throw new IncorrectFieldException("Confirmed requests full");
         }
-        List<ParticipationRequest> eventRequestList = repository.findByIdIn((updateRequest.getRequestIds())); // получили список запросов
+        List<ParticipationRequest> eventRequestList = repository.findByIdIn((updateRequest.getRequestIds()));
         List<ParticipationRequest> confirmedRequests = new ArrayList<>();
         List<ParticipationRequest> rejectedRequests = new ArrayList<>();
         EventRequestStatusUpdateResult updateResult = new EventRequestStatusUpdateResult();

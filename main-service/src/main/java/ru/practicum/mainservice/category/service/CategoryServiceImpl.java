@@ -14,6 +14,7 @@ import ru.practicum.mainservice.event.model.Event;
 import ru.practicum.mainservice.event.repository.EventRepository;
 import ru.practicum.mainservice.exception.IncorrectFieldException;
 import ru.practicum.mainservice.exception.IncorrectObjectException;
+import ru.practicum.mainservice.exception.ObjectNotFoundException;
 import ru.practicum.mainservice.util.State;
 import ru.practicum.mainservice.util.checker.CategoryChecker;
 
@@ -49,13 +50,13 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto getCategoryById(Long catId) throws IncorrectObjectException {
+    public CategoryDto getCategoryById(Long catId) throws ObjectNotFoundException {
         categoryChecker.categoryExist(catId);
         return mapper.toDto(categoryRepository.getReferenceById(catId));
     }
 
     @Override
-    public CategoryDto updateCategory(Long catId, CategoryDto categoryDto) throws IncorrectObjectException, IncorrectFieldException {
+    public CategoryDto updateCategory(Long catId, CategoryDto categoryDto) throws IncorrectObjectException, IncorrectFieldException, ObjectNotFoundException {
         categoryChecker.categoryExist(catId);
         categoryChecker.idIsNotBlank(catId);
         final Category updatedCategory = categoryRepository.getReferenceById(catId);
@@ -69,9 +70,8 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-    //TODO***
     @Override
-    public void deleteCategory(Long categoryId) throws IncorrectObjectException, IncorrectFieldException {
+    public void deleteCategory(Long categoryId) throws IncorrectFieldException {
         List<Event> events = eventRepository.findAllByCategoryIdInAndEventDateIsAfter(List.of(categoryId),
                 LocalDateTime.now(), Pageable.unpaged());
         if (!events.isEmpty()) {
