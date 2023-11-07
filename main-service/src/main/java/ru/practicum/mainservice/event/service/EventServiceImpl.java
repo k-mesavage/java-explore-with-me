@@ -21,13 +21,16 @@ import ru.practicum.mainservice.util.*;
 import ru.practicum.stats.client.StatsClient;
 import ru.practicum.stats.dto.StatDto;
 import ru.practicum.stats.dto.StatOutputDto;
+import ru.practicum.stats.dto.StatsDtoToGetStats;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,7 +46,7 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
     private final CompilationEventRepository compilationEventRepository;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private final StatsClient statsClient = new StatsClient("http://stats-server:9090");
+    private final StatsClient statsClient = new StatsClient();
 
     @Override
     public EventFullDto createEvent(NewEventDto newEventDto, Long userId)
@@ -76,7 +79,7 @@ public class EventServiceImpl implements EventService {
                 event.setState(State.PENDING);
                 return eventMapper.toEventFullDto(eventRepository.save(event));
             }
-            updateFields(event, requestDto);
+            event = updateFields(event, requestDto);
         }
         return eventMapper.toEventFullDto(eventRepository.save(event));
     }
@@ -96,7 +99,9 @@ public class EventServiceImpl implements EventService {
         userChecker.checkUserExists(userId);
         eventChecker.eventExist(eventId);
         eventChecker.eventInitiatorIsNot(eventId, userId);
-        return eventMapper.toEventFullDto(eventRepository.findAllByInitiatorIdAndId(userId, eventId));
+        Event event = eventRepository.findAllByInitiatorIdAndId(userId, eventId);
+        event.setViews(event.getViews());
+        return eventMapper.toEventFullDto(event);
     }
 
     @Override
@@ -159,19 +164,18 @@ public class EventServiceImpl implements EventService {
                 events = events.stream().sorted(Comparator.comparing(Event::getViews)).collect(Collectors.toList());
             }
         }
-        statsClient.post(new StatDto("event-service", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now()));
-
-        addViewsForEvents(events);
-        return eventMapper.toListOfEventShortDto(events);
+        List<Event> eventsWithViews = getEventViewsList(events);
+        statsClient.saveHit("/hit", getStatsDtoToSave(request));
+        return eventMapper.toListOfEventShortDto(eventsWithViews);
     }
 
     @Override
     public EventFullDto getEventById(Long eventId, HttpServletRequest request) throws URISyntaxException, ObjectNotFoundException {
-        final Event event = eventRepository.getByIdPublished(eventId);
-        if (event != null) {
-            statsClient.post(new StatDto("event-service", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now()));
-            event.setViews(getViews(event));
-            return eventMapper.toEventFullDto(event);
+        final List<Event> events = eventRepository.getByIdPublished(eventId);
+        if (!events.isEmpty()) {
+            List<Event> eventsWithViews = getEventViewsList(events);
+            addViewsForEvents(eventsWithViews);
+            return eventMapper.toEventFullDto(eventsWithViews.get(0));
         } else throw new ObjectNotFoundException("Event not found");
     }
 
@@ -182,7 +186,7 @@ public class EventServiceImpl implements EventService {
         if (requestDto.getEventDate() != null) {
             eventChecker.isEventDateBeforeTwoHours(requestDto.getEventDate());
         }
-        final Event event = eventRepository.getReferenceById(eventId);
+        Event event = eventRepository.getReferenceById(eventId);
         eventChecker.statusForAdminUpdate(event, requestDto);
         if (requestDto.getStateAction() != null) {
             if (requestDto.getStateAction().equals(StateAction.REJECT_EVENT)) {
@@ -191,8 +195,7 @@ public class EventServiceImpl implements EventService {
                 return eventMapper.toEventFullDto(eventRepository.save(event));
             }
         }
-        updateFields(event, requestDto);
-        event.setState(State.PUBLISHED);
+        event = updateFields(event, requestDto);
         event.setViews(getViews(event));
         return eventMapper.toEventFullDto(eventRepository.save(event));
     }
@@ -264,24 +267,54 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toListOfEventShortDto(eventRepository.getAllByIds(eventsIds));
     }
 
+    private StatDto getStatsDtoToSave(HttpServletRequest request) {
+        return new StatDto(
+                "ewm-main",
+                request.getRequestURI(),
+                request.getRemoteAddr(),
+                LocalDateTime.now().format(formatter)
+        );
+    }
+
+    private StatsDtoToGetStats getStatsDtoToGetStats(List<String> uris, boolean unique, Integer from, Integer size) {
+        return new StatsDtoToGetStats(
+                "2020-05-05 00:00:00",
+                "2025-01-01 00:00:00",
+                uris,
+                unique,
+                from == null ? 0 : from,
+                size == null ? 10 : size
+        );
+    }
+
+    private void addViewForEvent(Event event) {
+        event.setViews(event.getViews() + 1);
+        eventRepository.save(event);
+    }
+
     private void addViewsForEvents(List<Event> events) {
         for (Event event : events) {
-            event.setViews(getViews(event));
+            event.setViews(getViews(event) + 1);
             eventRepository.save(event);
         }
     }
 
     private Long getViews(Event event) {
         String eventUri = "/events/" + event.getId();
-        List<StatOutputDto> stats = statsClient.get(null, null, List.of(eventUri), true);
-        return stats.isEmpty() ? 0 : stats.get(0).getHits();
+        StatsDtoToGetStats statsDtoToGetStats = getStatsDtoToGetStats(List.of(eventUri), true, null, null);
+        List<StatOutputDto> statsList = statsClient.getStatistics(statsDtoToGetStats);
+        return statsList.size() == 0 ? 0 : statsList.get(0).getHits();
     }
 
-    private void updateFields(Event event, UpdateEventRequestDto requestDto) throws WrongConditionException {
+    private Event updateFields(Event event, UpdateEventRequestDto requestDto) throws WrongConditionException {
         if (requestDto.getStateAction() != null) {
-        if (requestDto.getStateAction().equals(StateAction.CANCEL_REVIEW)) event.setState(State.CANCELED);
-        if (requestDto.getStateAction().equals(StateAction.PUBLISH_EVENT)) event.setState(State.PUBLISHED);
-    }
+            if (requestDto.getStateAction().equals(StateAction.CANCEL_REVIEW)) {
+                event.setState(State.CANCELED);
+            }
+            if (requestDto.getStateAction().equals(StateAction.PUBLISH_EVENT)) {
+                event.setState(State.PUBLISHED);
+            }
+        }
         if (requestDto.getAnnotation() != null) {
             event.setAnnotation(requestDto.getAnnotation());
         }
@@ -304,5 +337,34 @@ public class EventServiceImpl implements EventService {
         if (requestDto.getTitle() != null) {
             event.setTitle(requestDto.getTitle());
         }
+        return event;
+    }
+
+    List<Event> getEventViewsList(List<Event> events) {
+        String eventUri = "/events/";
+        List<String> uriEventList = events.stream()
+                .map(e -> eventUri + e.getId().toString())
+                .collect(Collectors.toList());
+        StatsDtoToGetStats statsDtoToGetStats = getStatsDtoToGetStats(uriEventList, true, null, null);
+        List<StatOutputDto> statsList = statsClient.getStatistics(statsDtoToGetStats);
+
+        Map<Long, Long> eventViewsMap = getEventHitsMap(statsList, events);
+
+        for (Event event : events) {
+            if (eventViewsMap.containsKey(event.getId())) event.setViews(eventViewsMap.get(event.getId()));
+        }
+        return events;
+    }
+
+    private Map<Long, Long> getEventHitsMap(List<StatOutputDto> hitDtoList, List<Event> events) {
+        Map<Long, Long> hits = new HashMap<>();
+        if (hitDtoList.size() == 0) {
+            for (Event event : events) hits.put(event.getId(), 0L);
+            return hits;
+        }
+        for (StatOutputDto viewStatsDto : hitDtoList) {
+            hits.put((long) Integer.parseInt(viewStatsDto.getUri().replace("/events/", "")), viewStatsDto.getHits());
+        }
+        return hits;
     }
 }

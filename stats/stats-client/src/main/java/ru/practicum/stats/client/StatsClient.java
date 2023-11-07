@@ -1,43 +1,55 @@
 package ru.practicum.stats.client;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.stats.dto.StatDto;
 import ru.practicum.stats.dto.StatOutputDto;
+import ru.practicum.stats.dto.StatsDtoToGetStats;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
 public class StatsClient {
-    private final WebClient webClient;
+
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public StatsClient(@Value("${stats.server.url}") String host) {
-        this.webClient = WebClient.create(host);
-    }
+    WebClient webClient = WebClient.create();
 
-    public void post(StatDto statDto) throws URISyntaxException {
-        webClient.post()
-                .uri("/hit")
-                .bodyValue(statDto)
+    final String uri = "http://stats-server:9090";
+
+    public void saveHit(String path, StatDto statsDtoToSave) {
+        webClient
+                .method(HttpMethod.POST)
+                .uri(uri + path)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(statsDtoToSave))
                 .retrieve()
-                .bodyToMono(Object.class)
-                .block();
+                .toEntity(String.class)
+                .subscribe(responseEntity -> {
+                    System.out.println("Статус код: " + responseEntity.getStatusCode());
+                    System.out.println("Ответ: " + responseEntity.getBody());
+                });
     }
 
-    public List<StatOutputDto> get(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
+    public List<StatOutputDto> getStatistics(StatsDtoToGetStats statsParameters) {
+        String endpointPath = "/stats";
+
+        String url = UriComponentsBuilder.fromHttpUrl(uri + endpointPath)
+                .queryParam("start", statsParameters.getStart())
+                .queryParam("end", statsParameters.getEnd())
+                .queryParam("uris", statsParameters.getUris())
+                .queryParam("unique", statsParameters.isUnique())
+                .queryParam("from", statsParameters.getFrom())
+                .queryParam("size", statsParameters.getSize())
+                .toUriString();
+
         return webClient.get()
-                .uri(uriBuilder -> uriBuilder.path("/stats")
-                        .queryParam("start", start)
-                        .queryParam("end", end)
-                        .queryParam("uris", uris)
-                        .queryParam("unique", unique)
-                        .build())
+                .uri(url)
                 .retrieve()
                 .bodyToFlux(StatOutputDto.class)
                 .collectList()

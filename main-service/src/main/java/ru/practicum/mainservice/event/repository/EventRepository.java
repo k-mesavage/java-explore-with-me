@@ -1,10 +1,8 @@
 package ru.practicum.mainservice.event.repository;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.mainservice.event.model.Event;
 import ru.practicum.mainservice.util.State;
 
@@ -64,7 +62,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                                                           Integer size);
 
     @Query("select e from Event e where e.id = :eventId and e.state = 'PUBLISHED'")
-    Event getByIdPublished(Long eventId);
+    List<Event> getByIdPublished(Long eventId);
 
     List<Event> findEventsByInitiatorIdInAndStateInAndCategoryIdInAndEventDateIsAfterAndEventDateIsBefore(List<Long> users,
                                                                                                           List<State> states,
