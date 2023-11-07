@@ -10,6 +10,7 @@ import static ru.practicum.mainservice.util.State.REJECTED;
 
 @Service
 public class StatusChecker {
+
     public void checkStatus(State newStatus) throws IncorrectFieldException {
         final Set<State> availableStats = Set.of(CONFIRMED, REJECTED);
         if (!availableStats.contains(newStatus)) {

@@ -62,7 +62,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                                                           Integer size);
 
     @Query("select e from Event e where e.id = :eventId and e.state = 'PUBLISHED'")
-    List<Event> getByIdPublished(Long eventId);
+    Event getByIdPublished(Long eventId);
 
     List<Event> findEventsByInitiatorIdInAndStateInAndCategoryIdInAndEventDateIsAfterAndEventDateIsBefore(List<Long> users,
                                                                                                           List<State> states,

@@ -21,7 +21,7 @@ public class UserController {
     private final UserService service;
 
     @GetMapping
-    public ResponseEntity<List<User>> getUsers(@RequestParam(name = "ids", required = false) List<Long> ids,
+    public ResponseEntity<List<UserDto>> getUsers(@RequestParam(name = "ids", required = false) List<Long> ids,
                                                @RequestParam(name = "from", defaultValue = "0") int from,
                                                @RequestParam(name = "size", defaultValue = "10") int size) {
         log.info("Try get users which ids {}", ids);

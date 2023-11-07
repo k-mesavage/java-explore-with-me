@@ -72,7 +72,9 @@ public class EventServiceImpl implements EventService {
         userChecker.checkUserExists(userId);
         eventChecker.eventExist(eventId);
         eventChecker.eventInitiator(eventId, userId);
-
+        if (requestDto.getEventDate() != null) {
+            eventChecker.isEventDateBeforeTwoHours(requestDto.getEventDate());
+        }
         if (requestDto.getStateAction() != null) {
             eventChecker.eventPublished(event);
             if (event.getState().equals(State.CANCELED) && stateAction.equals(StateAction.SEND_TO_REVIEW)) {
@@ -172,12 +174,11 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getEventById(Long eventId, HttpServletRequest request) throws ObjectNotFoundException {
-        final List<Event> events = eventRepository.getByIdPublished(eventId);
-        if (!events.isEmpty()) {
-            List<Event> eventsWithViews = getEventViewsList(events);
+        Event event = eventRepository.getByIdPublished(eventId);
+        if (event != null) {
+            event.setViews(getViews(event));
             statsClient.saveHit("/hit", getStatsDtoToSave(request));
-            addViewsForEvents(eventsWithViews);
-            return eventMapper.toEventFullDto(eventsWithViews.get(0));
+            return eventMapper.toEventFullDto(event);
         } else throw new ObjectNotFoundException("Event not found");
     }
 
@@ -290,18 +291,11 @@ public class EventServiceImpl implements EventService {
         );
     }
 
-    private void addViewsForEvents(List<Event> events) {
-        for (Event event : events) {
-            event.setViews(getViews(event) + 1);
-            eventRepository.save(event);
-        }
-    }
-
     private Long getViews(Event event) {
         String eventUri = "/events/" + event.getId();
         StatsDtoToGetStats statsDtoToGetStats = getStatsDtoToGetStats(List.of(eventUri), true, null, null);
         List<StatOutputDto> statsList = statsClient.getStatistics(statsDtoToGetStats);
-        return statsList.size() == 0 ? 0 : statsList.get(0).getHits();
+        return statsList.isEmpty() ? 0 : statsList.get(0).getHits();
     }
 
     private Event updateFields(Event event, UpdateEventRequestDto requestDto) throws WrongConditionException {
@@ -316,8 +310,8 @@ public class EventServiceImpl implements EventService {
         if (requestDto.getAnnotation() != null) {
             event.setAnnotation(requestDto.getAnnotation());
         }
-        if (requestDto.getEventDate() != null) {
-            eventChecker.isEventDateBeforeTwoHours(requestDto.getEventDate());
+        if (requestDto.getEventDate() != null && requestDto.getEventDate()
+                .isAfter(event.getEventDate())) {
             event.setEventDate(requestDto.getEventDate());
         }
         if (requestDto.getCategory() != null) {

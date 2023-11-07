@@ -12,6 +12,7 @@ import ru.practicum.mainservice.user.mapper.UserMapper;
 import ru.practicum.mainservice.user.model.User;
 import ru.practicum.mainservice.user.repository.UserRepository;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,9 +25,11 @@ public class UserServiceImpl implements UserService {
     private final UserRepository repository;
 
     @Override
-    public List<User> getUsers(List<Long> ids, int from, int size) {
+    public List<UserDto> getUsers(List<Long> ids, int from, int size) {
         PageRequest pageRequest = PageRequest.of(from/size, size);
-        return repository.findByIdIn(ids, pageRequest).stream().collect(Collectors.toList());
+        if (ids == null) return repository.findAll(pageRequest).stream().map(mapper::toDto).collect(Collectors.toList());
+        if (ids.isEmpty()) return Collections.emptyList();
+        return repository.findByIdIn(ids, pageRequest).stream().map(mapper::toDto).collect(Collectors.toList());
     }
 
 //TODO*
