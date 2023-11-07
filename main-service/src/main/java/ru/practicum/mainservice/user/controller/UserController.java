@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.mainservice.exception.IncorrectFieldException;
 import ru.practicum.mainservice.user.dto.NewUserRequest;
 import ru.practicum.mainservice.user.dto.UserDto;
 import ru.practicum.mainservice.user.model.User;
@@ -29,7 +30,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDto> createUser(@Valid @RequestBody NewUserRequest newUserRequest) {
+    public ResponseEntity<UserDto> createUser(@Valid @RequestBody NewUserRequest newUserRequest) throws IncorrectFieldException {
         log.info("Try add User {}", newUserRequest.getEmail());
         return ResponseEntity.status(201).body(service.createUser(newUserRequest));
     }

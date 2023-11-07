@@ -11,7 +11,7 @@ import java.util.List;
 public interface CompilationService {
 
     CompilationDto createCompilation(NewCompilationDto newCompilationDto) throws IncorrectObjectException, ObjectNotFoundException;
-
+    CompilationDto updateCompilation(Long compId, NewCompilationDto compilationDto) throws ObjectNotFoundException;
     CompilationDto getCompilationById(Long compId) throws IncorrectObjectException;
 
     List<CompilationDto> getAllCompilations(Boolean pinned, int from, int size);

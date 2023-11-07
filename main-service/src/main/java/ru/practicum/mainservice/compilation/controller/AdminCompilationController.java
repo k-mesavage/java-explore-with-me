@@ -2,6 +2,8 @@ package ru.practicum.mainservice.compilation.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.mainservice.compilation.dto.CompilationDto;
 import ru.practicum.mainservice.compilation.dto.NewCompilationDto;
@@ -9,11 +11,14 @@ import ru.practicum.mainservice.compilation.service.CompilationService;
 import ru.practicum.mainservice.exception.IncorrectObjectException;
 import ru.practicum.mainservice.exception.ObjectNotFoundException;
 import ru.practicum.mainservice.exception.WrongConditionException;
+import ru.practicum.mainservice.util.constraints.Create;
+import ru.practicum.mainservice.util.constraints.Update;
 
 import javax.validation.Valid;
 
 @Slf4j
 @RestController
+@Validated
 @RequiredArgsConstructor
 @RequestMapping("/admin/compilations")
 public class AdminCompilationController {
@@ -21,13 +26,21 @@ public class AdminCompilationController {
     private final CompilationService service;
 
     @PostMapping
-    public CompilationDto addCompilation(@RequestBody @Valid NewCompilationDto newCompilationDto)
+    @ResponseStatus(HttpStatus.CREATED)
+    public CompilationDto addCompilation(@RequestBody @Validated(Create.class) NewCompilationDto newCompilationDto)
             throws IncorrectObjectException, ObjectNotFoundException {
         log.info("Add compilation {}", newCompilationDto);
         return service.createCompilation(newCompilationDto);
     }
 
+    @PatchMapping("/{compId}")
+    public CompilationDto updateCompilation(@PathVariable Long compId,
+                                            @Validated(Update.class) @RequestBody NewCompilationDto compilationDto) throws ObjectNotFoundException {
+        return service.updateCompilation(compId, compilationDto);
+    }
+
     @DeleteMapping("/{compId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCompilation(@PathVariable Long compId) throws IncorrectObjectException {
         log.info("Delete compilation with id {}", compId);
         service.deleteCompilationById(compId);
@@ -41,6 +54,7 @@ public class AdminCompilationController {
     }
 
     @DeleteMapping("/{compId}/events/{eventId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteEventFromCompilation(@PathVariable Long compId,
                                            @PathVariable Long eventId) throws IncorrectObjectException, ObjectNotFoundException {
         log.info("Delete event {} from compilation {}", eventId, compId);

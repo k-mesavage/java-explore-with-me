@@ -1,4 +1,4 @@
-package ru.practicum.mainservice.util;
+package ru.practicum.mainservice.util.checker;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -7,6 +7,7 @@ import ru.practicum.mainservice.exception.IncorrectObjectException;
 import ru.practicum.mainservice.exception.WrongConditionException;
 import ru.practicum.mainservice.request.model.ParticipationRequest;
 import ru.practicum.mainservice.request.repository.ParticipationRepository;
+import ru.practicum.mainservice.util.State;
 
 import java.util.List;
 import java.util.Objects;

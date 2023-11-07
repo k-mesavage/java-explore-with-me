@@ -16,6 +16,10 @@ import ru.practicum.mainservice.request.model.ParticipationRequest;
 import ru.practicum.mainservice.request.repository.ParticipationRepository;
 import ru.practicum.mainservice.user.repository.UserRepository;
 import ru.practicum.mainservice.util.*;
+import ru.practicum.mainservice.util.checker.EventChecker;
+import ru.practicum.mainservice.util.checker.RequestChecker;
+import ru.practicum.mainservice.util.checker.StatusChecker;
+import ru.practicum.mainservice.util.checker.UserChecker;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -47,9 +51,14 @@ public class RequestServiceImpl implements RequestService {
         eventChecker.checkEventLimit(eventId);
         ParticipationRequest request = new ParticipationRequest();
         request.setRequester(userRepository.getById(userId));
-        request.setEvent(eventRepository.getById(eventId));
         request.setCreated(LocalDateTime.now());
-        request.setStatus(CONFIRMED);
+        final Event event = eventRepository.getById(eventId);
+        request.setEvent(event);
+        if (event.getParticipantLimit() == 0) {
+            request.setStatus(CONFIRMED);
+        } else {
+            request.setStatus(PENDING);
+        }
         return mapper.toDto(participationRepository.save(request));
     }
 
@@ -85,7 +94,6 @@ public class RequestServiceImpl implements RequestService {
         for (ParticipationRequest eventRequest : eventRequestList) {
             if (event.getConfirmedRequests() <= event.getParticipantLimit()) {
                 if (eventRequest.getStatus().equals(PENDING)) {
-
                     eventRequest.setStatus(CONFIRMED);
                     repository.save(eventRequest);
                     confirmedRequests.add(eventRequest);

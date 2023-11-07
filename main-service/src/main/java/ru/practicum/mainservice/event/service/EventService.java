@@ -52,5 +52,5 @@ public interface EventService {
                                         int from,
                                         int size);
 
-    List<EventShortDto> getEventsByCompilationId(Long compilationId);
+    List<EventShortDto> getEventsByCompilationId(List<Long> compilationId);
 }

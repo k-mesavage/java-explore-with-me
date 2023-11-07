@@ -1,4 +1,4 @@
-package ru.practicum.mainservice.util;
+package ru.practicum.mainservice.util.checker;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -8,6 +8,8 @@ import ru.practicum.mainservice.event.repository.EventRepository;
 import ru.practicum.mainservice.exception.IncorrectFieldException;
 import ru.practicum.mainservice.exception.ObjectNotFoundException;
 import ru.practicum.mainservice.exception.WrongConditionException;
+import ru.practicum.mainservice.util.State;
+import ru.practicum.mainservice.util.StateAction;
 
 import java.time.LocalDateTime;
 import java.util.Objects;

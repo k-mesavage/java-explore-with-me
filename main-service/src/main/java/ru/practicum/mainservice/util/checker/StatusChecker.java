@@ -1,7 +1,8 @@
-package ru.practicum.mainservice.util;
+package ru.practicum.mainservice.util.checker;
 
 import org.springframework.stereotype.Service;
 import ru.practicum.mainservice.exception.IncorrectFieldException;
+import ru.practicum.mainservice.util.State;
 
 import java.util.Set;
 

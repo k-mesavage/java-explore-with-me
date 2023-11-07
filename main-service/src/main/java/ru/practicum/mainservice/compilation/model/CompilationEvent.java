@@ -14,7 +14,9 @@ import javax.persistence.*;
 public class CompilationEvent {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
+    @Column(name = "compilation_id")
     private Long compilationId;
+    @Column(name = "event_id")
     private Long eventId;
 }

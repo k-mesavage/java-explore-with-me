@@ -8,10 +8,9 @@ import ru.practicum.mainservice.compilation.model.CompilationEvent;
 import java.util.List;
 
 public interface CompilationEventRepository extends JpaRepository<CompilationEvent, Long> {
-    @Query("select ce.eventId from CompilationEvent ce where ce.compilationId = :compilationId")
-    List<Long> getCompilationEventIds(Long compilationId);
 
-    @Transactional
+    List<Long> getCompilationByEventIdIn(List<Long> compilationId);
+
     void deleteByCompilationIdAndEventId(Long compId, Long eventId);
 
     Boolean existsByCompilationIdAndEventId(Long compId, Long eventId);

@@ -18,6 +18,9 @@ import ru.practicum.mainservice.exception.WrongConditionException;
 import ru.practicum.mainservice.user.model.User;
 import ru.practicum.mainservice.user.repository.UserRepository;
 import ru.practicum.mainservice.util.*;
+import ru.practicum.mainservice.util.checker.CategoryChecker;
+import ru.practicum.mainservice.util.checker.EventChecker;
+import ru.practicum.mainservice.util.checker.UserChecker;
 import ru.practicum.stats.client.StatsClient;
 import ru.practicum.stats.dto.StatDto;
 import ru.practicum.stats.dto.StatOutputDto;
@@ -265,8 +268,8 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventShortDto> getEventsByCompilationId(Long compilationId) {
-        List<Long> eventsIds = compilationEventRepository.getCompilationEventIds(compilationId);
+    public List<EventShortDto> getEventsByCompilationId(List<Long> compilationId) {
+        List<Long> eventsIds = compilationEventRepository.getCompilationByEventIdIn(compilationId);
         return eventMapper.toListOfEventShortDto(eventRepository.getAllByIds(eventsIds));
 
     }

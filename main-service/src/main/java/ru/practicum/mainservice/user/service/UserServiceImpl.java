@@ -6,6 +6,7 @@ import org.hibernate.ObjectNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import ru.practicum.mainservice.exception.IncorrectFieldException;
 import ru.practicum.mainservice.user.dto.NewUserRequest;
 import ru.practicum.mainservice.user.dto.UserDto;
 import ru.practicum.mainservice.user.mapper.UserMapper;
@@ -34,14 +35,12 @@ public class UserServiceImpl implements UserService {
 
 //TODO*
     @Override
-    public UserDto createUser(NewUserRequest newUserRequest) {
+    public UserDto createUser(NewUserRequest newUserRequest) throws IncorrectFieldException {
         User user = mapper.toUser(newUserRequest);
         try {
             return mapper.toDto(repository.save(user));
         } catch (DataIntegrityViolationException e) {
-            String errorMessage = String.format("User with email='%s' already exists!", newUserRequest.getEmail());
-            log.warn(errorMessage);
-            throw new RuntimeException();
+            throw new IncorrectFieldException(String.format("User with email='%s' already exists!", newUserRequest.getEmail()));
         }
     }
 

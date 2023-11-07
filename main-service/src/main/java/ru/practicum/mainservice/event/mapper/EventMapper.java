@@ -11,7 +11,7 @@ import ru.practicum.mainservice.event.dto.NewEventDto;
 import ru.practicum.mainservice.event.model.Event;
 import ru.practicum.mainservice.location.model.Location;
 import ru.practicum.mainservice.user.dto.UserShortDto;
-import ru.practicum.mainservice.util.EventChecker;
+import ru.practicum.mainservice.util.checker.EventChecker;
 import ru.practicum.mainservice.util.State;
 
 import java.time.LocalDateTime;
