@@ -16,6 +16,7 @@ import java.util.List;
 @Table(name = "compilations")
 @Builder
 public class Compilation {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

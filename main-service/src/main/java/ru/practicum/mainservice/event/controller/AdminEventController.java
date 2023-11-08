@@ -10,7 +10,7 @@ import ru.practicum.mainservice.exception.IncorrectFieldException;
 import ru.practicum.mainservice.exception.IncorrectObjectException;
 import ru.practicum.mainservice.exception.ObjectNotFoundException;
 import ru.practicum.mainservice.exception.WrongConditionException;
-import ru.practicum.mainservice.util.State;
+import ru.practicum.mainservice.util.enums.State;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;

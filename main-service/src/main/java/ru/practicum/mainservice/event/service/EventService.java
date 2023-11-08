@@ -5,8 +5,8 @@ import ru.practicum.mainservice.exception.IncorrectFieldException;
 import ru.practicum.mainservice.exception.IncorrectObjectException;
 import ru.practicum.mainservice.exception.ObjectNotFoundException;
 import ru.practicum.mainservice.exception.WrongConditionException;
-import ru.practicum.mainservice.util.EventSort;
-import ru.practicum.mainservice.util.State;
+import ru.practicum.mainservice.util.enums.EventSort;
+import ru.practicum.mainservice.util.enums.State;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URISyntaxException;
@@ -25,7 +25,7 @@ public interface EventService {
 
     List<EventFullDto> getEventsByInitiator(Long userId, int from, int size, HttpServletRequest request) throws IncorrectObjectException;
 
-    List<EventShortDto> getEvents(String text,
+    List<EventFullDto> getEvents(String text,
                                   List<Long> categories,
                                   Boolean paid,
                                   String rangeStart,
@@ -51,6 +51,4 @@ public interface EventService {
                                         String rangeEnd,
                                         int from,
                                         int size);
-
-    List<EventShortDto> getEventsByCompilationId(List<Long> compilationId);
 }

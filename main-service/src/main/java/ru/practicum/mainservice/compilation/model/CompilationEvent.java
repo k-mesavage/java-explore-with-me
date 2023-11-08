@@ -12,6 +12,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "compilations_events")
 public class CompilationEvent {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import ru.practicum.mainservice.category.model.Category;
 import ru.practicum.mainservice.user.model.User;
-import ru.practicum.mainservice.util.State;
+import ru.practicum.mainservice.util.enums.State;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;

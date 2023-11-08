@@ -1,4 +1,4 @@
-package ru.practicum.mainservice.util.checker;
+package ru.practicum.mainservice.util.checkers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

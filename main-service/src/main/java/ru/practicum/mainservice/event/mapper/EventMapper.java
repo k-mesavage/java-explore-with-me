@@ -4,15 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.mainservice.category.dto.CategoryDto;
 import ru.practicum.mainservice.category.model.Category;
-import ru.practicum.mainservice.category.repository.CategoryRepository;
 import ru.practicum.mainservice.event.dto.EventFullDto;
 import ru.practicum.mainservice.event.dto.EventShortDto;
 import ru.practicum.mainservice.event.dto.NewEventDto;
 import ru.practicum.mainservice.event.model.Event;
 import ru.practicum.mainservice.location.model.Location;
 import ru.practicum.mainservice.user.dto.UserShortDto;
-import ru.practicum.mainservice.util.checker.EventChecker;
-import ru.practicum.mainservice.util.State;
+import ru.practicum.mainservice.util.enums.State;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,9 +19,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class EventMapper {
-
-    private final EventChecker eventChecker;
-    private final CategoryRepository categoryRepository;
 
     public Event toEvent(NewEventDto newEventDto) {
         Event event = new Event();
@@ -74,23 +69,15 @@ public class EventMapper {
 
     public EventShortDto toEventShortDto(Event event) {
         return EventShortDto.builder()
-                .id(event.getId())
                 .annotation(event.getAnnotation())
                 .category(new CategoryDto(event.getCategory().getId(), event.getCategory().getName()))
+                .confirmedRequests(event.getConfirmedRequests())
                 .eventDate(event.getEventDate())
+                .id(event.getId().intValue())
                 .initiator(new UserShortDto(event.getInitiator().getId(), event.getInitiator().getName()))
                 .paid(event.getPaid())
                 .title(event.getTitle())
                 .views(event.getViews())
                 .build();
     }
-
-    public List<EventShortDto> toListOfEventShortDto(Iterable<Event> events) {
-        List<EventShortDto> eventShortDtos = new ArrayList<>();
-        for (Event event : events) {
-            eventShortDtos.add(toEventShortDto(event));
-        }
-        return eventShortDtos;
-    }
-
 }

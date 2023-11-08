@@ -15,8 +15,8 @@ import ru.practicum.mainservice.event.repository.EventRepository;
 import ru.practicum.mainservice.exception.IncorrectFieldException;
 import ru.practicum.mainservice.exception.IncorrectObjectException;
 import ru.practicum.mainservice.exception.ObjectNotFoundException;
-import ru.practicum.mainservice.util.State;
-import ru.practicum.mainservice.util.checker.CategoryChecker;
+import ru.practicum.mainservice.util.enums.State;
+import ru.practicum.mainservice.util.checkers.CategoryChecker;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -56,7 +56,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto updateCategory(Long catId, CategoryDto categoryDto) throws IncorrectObjectException, IncorrectFieldException, ObjectNotFoundException {
+    public CategoryDto updateCategory(Long catId, CategoryDto categoryDto) throws IncorrectFieldException, ObjectNotFoundException {
         categoryChecker.categoryExist(catId);
         categoryChecker.idIsNotBlank(catId);
         final Category updatedCategory = categoryRepository.getReferenceById(catId);

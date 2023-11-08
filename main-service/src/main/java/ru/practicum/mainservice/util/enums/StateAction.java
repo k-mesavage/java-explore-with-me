@@ -1,4 +1,4 @@
-package ru.practicum.mainservice.util;
+package ru.practicum.mainservice.util.enums;
 
 public enum StateAction {
     PUBLISH_EVENT,

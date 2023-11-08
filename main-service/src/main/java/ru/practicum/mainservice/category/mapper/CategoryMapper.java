@@ -10,6 +10,7 @@ import java.util.List;
 
 @Service
 public class CategoryMapper {
+
     public Category toCategory(NewCategoryDto newCategoryDto) {
         return Category.builder()
                 .name(newCategoryDto.getName())

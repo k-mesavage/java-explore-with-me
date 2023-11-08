@@ -11,6 +11,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class UpdateCompilationRequest {
+
     private List<EventShortDto> events;
     private boolean pinned;
     private String title;

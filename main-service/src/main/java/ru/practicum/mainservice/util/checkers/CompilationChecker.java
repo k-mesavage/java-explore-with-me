@@ -1,4 +1,4 @@
-package ru.practicum.mainservice.util.checker;
+package ru.practicum.mainservice.util.checkers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,24 +29,6 @@ public class CompilationChecker {
         }
         if (allCompilations.isEmpty() || !ids.contains(compId)) {
             throw new IncorrectObjectException("No compilation with id " + compId);
-        }
-    }
-
-    public void rePinned(Long compId) throws WrongConditionException {
-        if (compilationRepository.getReferenceById(compId).getPinned()) {
-            throw new WrongConditionException("Compilation with id " + compId + " already pinned");
-        }
-    }
-
-    public void noPinned(Long compId) throws WrongConditionException {
-        if (!compilationRepository.getReferenceById(compId).getPinned()) {
-            throw new WrongConditionException("Compilation with id " + compId + " is no pinned");
-        }
-    }
-
-    public void eventInCompilation(Long compId, Long eventId) {
-        if (!compilationEventRepository.existsByCompilationIdAndEventId(compId, eventId)) {
-            throw new IllegalArgumentException("Event id = " + eventId + " is not in compilation id = " + compId);
         }
     }
 }

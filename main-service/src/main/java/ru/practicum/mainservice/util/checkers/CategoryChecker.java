@@ -1,11 +1,10 @@
-package ru.practicum.mainservice.util.checker;
+package ru.practicum.mainservice.util.checkers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.mainservice.category.model.Category;
 import ru.practicum.mainservice.category.repository.CategoryRepository;
 import ru.practicum.mainservice.exception.IncorrectFieldException;
-import ru.practicum.mainservice.exception.IncorrectObjectException;
 import ru.practicum.mainservice.exception.ObjectNotFoundException;
 
 import java.util.List;

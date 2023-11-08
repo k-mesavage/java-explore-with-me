@@ -2,6 +2,7 @@ package ru.practicum.mainservice.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -46,6 +47,17 @@ public class ErrorHandler {
                 exception.getMessage(),
                 "WRONG CONDITION",
                 "BAD REQUEST",
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleHttpMessageNotReadableException(final HttpMessageNotReadableException exception) {
+        log.warn(exception.getMessage());
+        return new ApiError(List.of(Arrays.toString(exception.getStackTrace())),
+                exception.getMessage(),
+                "NOT READABLE",
+                "CONFLICT",
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
 }

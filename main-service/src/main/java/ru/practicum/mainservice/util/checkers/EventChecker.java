@@ -1,4 +1,4 @@
-package ru.practicum.mainservice.util.checker;
+package ru.practicum.mainservice.util.checkers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -8,8 +8,8 @@ import ru.practicum.mainservice.event.repository.EventRepository;
 import ru.practicum.mainservice.exception.IncorrectFieldException;
 import ru.practicum.mainservice.exception.ObjectNotFoundException;
 import ru.practicum.mainservice.exception.WrongConditionException;
-import ru.practicum.mainservice.util.State;
-import ru.practicum.mainservice.util.StateAction;
+import ru.practicum.mainservice.util.enums.State;
+import ru.practicum.mainservice.util.enums.StateAction;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -66,7 +66,7 @@ public class EventChecker {
     }
 
     public void eventPublishedState(Long eventId) throws IncorrectFieldException {
-        Event event = eventRepository.getById(eventId);
+        Event event = eventRepository.getReferenceById(eventId);
         if (!event.getState().equals(State.PUBLISHED)) {
             throw new IncorrectFieldException("It is impossible to create a request to not PUBLISHED event");
         }
@@ -80,11 +80,9 @@ public class EventChecker {
 
     public void checkEventLimit(Long eventId) throws IncorrectFieldException {
         Event event = eventRepository.getReferenceById(eventId);
-        if (event.getParticipantLimit() != 0) {
-            int spareParticipantSlots = event.getParticipantLimit() - event.getConfirmedRequests();
-            if (spareParticipantSlots == 0) {
-                throw new IncorrectFieldException("Participants limit for this event has been reached");
-            }
+        if (event.getParticipantLimit() <= event.getConfirmedRequests()
+                && (event.getConfirmedRequests() != 0 && event.getParticipantLimit() != 0)) {
+            throw new IncorrectFieldException("Participants limit for this event has been reached");
         }
     }
 

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.mainservice.compilation.dto.CompilationDto;
 import ru.practicum.mainservice.compilation.service.CompilationService;
 import ru.practicum.mainservice.exception.IncorrectObjectException;
+import ru.practicum.mainservice.exception.ObjectNotFoundException;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -28,7 +29,7 @@ public class PublicCompilationController {
     }
 
     @GetMapping("/{compId}")
-    public CompilationDto getCompilationById(@PathVariable Long compId) throws IncorrectObjectException {
+    public CompilationDto getCompilationById(@PathVariable Long compId) throws IncorrectObjectException, ObjectNotFoundException {
         log.info("Get compilation with id {} to public", compId);
         return service.getCompilationById(compId);
     }

@@ -17,10 +17,12 @@ import ru.practicum.mainservice.exception.ObjectNotFoundException;
 import ru.practicum.mainservice.exception.WrongConditionException;
 import ru.practicum.mainservice.user.model.User;
 import ru.practicum.mainservice.user.repository.UserRepository;
-import ru.practicum.mainservice.util.*;
-import ru.practicum.mainservice.util.checker.CategoryChecker;
-import ru.practicum.mainservice.util.checker.EventChecker;
-import ru.practicum.mainservice.util.checker.UserChecker;
+import ru.practicum.mainservice.util.checkers.CategoryChecker;
+import ru.practicum.mainservice.util.checkers.EventChecker;
+import ru.practicum.mainservice.util.checkers.UserChecker;
+import ru.practicum.mainservice.util.enums.EventSort;
+import ru.practicum.mainservice.util.enums.State;
+import ru.practicum.mainservice.util.enums.StateAction;
 import ru.practicum.stats.client.StatsClient;
 import ru.practicum.stats.dto.StatDto;
 import ru.practicum.stats.dto.StatOutputDto;
@@ -47,7 +49,6 @@ public class EventServiceImpl implements EventService {
     private final EventMapper eventMapper;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
-    private final CompilationEventRepository compilationEventRepository;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final StatsClient statsClient = new StatsClient();
 
@@ -85,7 +86,7 @@ public class EventServiceImpl implements EventService {
                 event.setState(State.PENDING);
                 return eventMapper.toEventFullDto(eventRepository.save(event));
             }
-            event = updateFields(event, requestDto);
+            updateFields(event, requestDto);
         }
         return eventMapper.toEventFullDto(eventRepository.save(event));
     }
@@ -119,16 +120,16 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventShortDto> getEvents(String text,
+    public List<EventFullDto> getEvents(String text,
                                          List<Long> categories,
                                          Boolean paid,
                                          String rangeStart,
                                          String rangeEnd,
                                          Boolean onlyAvailable,
-                                         ru.practicum.mainservice.util.EventSort sort,
+                                         EventSort sort,
                                          int from,
                                          int size,
-                                         HttpServletRequest request) throws WrongConditionException, URISyntaxException {
+                                         HttpServletRequest request) throws WrongConditionException {
         eventChecker.checkCorrectParams(from, size);
         LocalDateTime startTime;
         LocalDateTime endTime;
@@ -173,7 +174,7 @@ public class EventServiceImpl implements EventService {
         }
         statsClient.saveHit("/hit", getStatsDtoToSave(request));
         List<Event> eventsWithViews = getEventViewsList(events);
-        return eventMapper.toListOfEventShortDto(eventsWithViews);
+        return eventMapper.toListOfEventFullDto(eventsWithViews);
     }
 
     @Override
@@ -202,7 +203,7 @@ public class EventServiceImpl implements EventService {
                 return eventMapper.toEventFullDto(eventRepository.save(event));
             }
         }
-        event = updateFields(event, requestDto);
+        updateFields(event, requestDto);
         event.setViews(getViews(event));
         return eventMapper.toEventFullDto(eventRepository.save(event));
     }
@@ -226,7 +227,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto rejectEventByAdmin(Long eventId)
             throws WrongConditionException, ru.practicum.mainservice.exception.ObjectNotFoundException {
         eventChecker.eventExist(eventId);
-        Event event = eventRepository.getById(eventId);
+        Event event = eventRepository.getReferenceById(eventId);
         if (!event.getState().equals(State.PENDING)) {
             throw new WrongConditionException("Event must not be in state PENDING to be rejected");
         }
@@ -268,20 +269,12 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toListOfEventFullDto(events);
     }
 
-    @Override
-    public List<EventShortDto> getEventsByCompilationId(List<Long> compilationId) {
-        List<Long> eventsIds = compilationEventRepository.getCompilationByEventIdIn(compilationId);
-        return eventMapper.toListOfEventShortDto(eventRepository.getAllByIds(eventsIds));
-
-    }
-
     private StatDto getStatsDtoToSave(HttpServletRequest request) {
         return new StatDto(
                 "ewm-main",
                 request.getRequestURI(),
                 request.getRemoteAddr(),
-                LocalDateTime.now().format(formatter)
-        );
+                LocalDateTime.now().format(formatter));
     }
 
     private StatsDtoToGetStats getStatsDtoToGetStats(List<String> uris, boolean unique, Integer from, Integer size) {
@@ -302,7 +295,7 @@ public class EventServiceImpl implements EventService {
         return statsList.isEmpty() ? 0 : statsList.get(0).getHits();
     }
 
-    private Event updateFields(Event event, UpdateEventRequestDto requestDto) throws WrongConditionException {
+    private Event updateFields(Event event, UpdateEventRequestDto requestDto) {
         if (requestDto.getStateAction() != null) {
             if (requestDto.getStateAction().equals(StateAction.CANCEL_REVIEW)) {
                 event.setState(State.CANCELED);
@@ -354,7 +347,7 @@ public class EventServiceImpl implements EventService {
 
     private Map<Long, Long> getEventHitsMap(List<StatOutputDto> hitDtoList, List<Event> events) {
         Map<Long, Long> hits = new HashMap<>();
-        if (hitDtoList.size() == 0) {
+        if (hitDtoList.isEmpty()) {
             for (Event event : events) hits.put(event.getId(), 0L);
             return hits;
         }

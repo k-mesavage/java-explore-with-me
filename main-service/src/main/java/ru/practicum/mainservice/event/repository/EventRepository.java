@@ -4,7 +4,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.mainservice.event.model.Event;
-import ru.practicum.mainservice.util.State;
+import ru.practicum.mainservice.util.enums.State;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,8 +14,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findAllByInitiatorId(Long initiatorId, Pageable pageable);
 
     Event findAllByInitiatorIdAndId(Long initiatorId, Long eventId);
-
-    Integer countAllByCategoryId(Long categoryId);
 
     @Query(value = "select * from events e where e.state = 'PUBLISHED' and (lower(e.annotation) " +
             "like lower(concat('%',:text,'%')) or " +
@@ -72,10 +70,10 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                                                                                                           Pageable pageable);
 
     List<Event> findAllByCategoryIdInAndEventDateIsAfter(List<Long> categories, LocalDateTime now, Pageable pageable);
+
     List<Event> findAllByStateInAndEventDateIsAfter(List<State> states, LocalDateTime now, Pageable pageable);
 
     List<Event> findAllByEventDateIsAfter(LocalDateTime now, Pageable pageable);
 
-    @Query("select e from Event e where e.id in :ids")
-    List<Event> getAllByIds(List<Long> ids);
+    List<Event> getAllByIdIn(List<Long> ids);
 }

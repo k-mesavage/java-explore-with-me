@@ -22,7 +22,7 @@ public class CompilationMapper {
         List<EventShortDto> shortEvents = compilation.getEvents().stream()
                 .map(eventMapper::toEventShortDto)
                 .collect(Collectors.toList());
-        return new CompilationDto(shortEvents, compilation.getId(), compilation.getPinned(), compilation.getTitle());
+        return new CompilationDto(compilation.getId().intValue(), compilation.getTitle(), compilation.getPinned(), shortEvents);
     }
 
     public List<CompilationDto> toDtosList(List<Compilation> compilations) {
@@ -30,12 +30,10 @@ public class CompilationMapper {
     }
 
     public Compilation toCompilation(NewCompilationDto newCompilationDto, List<Event> events) {
-        Compilation compilation = Compilation.builder()
+        return Compilation.builder()
                 .title(newCompilationDto.getTitle())
-                .pinned(newCompilationDto.getPinned())
+                .pinned(newCompilationDto.isPinned())
                 .events(events)
                 .build();
-        compilation.setPinned(false);
-        return compilation;
     }
 }

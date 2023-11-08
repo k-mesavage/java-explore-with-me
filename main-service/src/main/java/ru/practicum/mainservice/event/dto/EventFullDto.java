@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import ru.practicum.mainservice.category.model.Category;
 import ru.practicum.mainservice.location.model.Location;
 import ru.practicum.mainservice.user.dto.UserShortDto;
-import ru.practicum.mainservice.util.State;
+import ru.practicum.mainservice.util.enums.State;
 
 import java.time.LocalDateTime;
 
@@ -53,5 +53,4 @@ public class EventFullDto {
     private Location location;
 
     private boolean requestModeration;
-
 }

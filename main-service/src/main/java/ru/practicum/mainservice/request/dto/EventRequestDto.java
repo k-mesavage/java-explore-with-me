@@ -6,7 +6,7 @@ import lombok.Value;
 import java.time.LocalDateTime;
 
 @Value
-public class ParticipationRequestDto {
+public class EventRequestDto {
     Long id;
     Long requester;
     Long event;

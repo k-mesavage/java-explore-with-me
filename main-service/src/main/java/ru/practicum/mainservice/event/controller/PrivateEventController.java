@@ -12,7 +12,7 @@ import ru.practicum.mainservice.exception.IncorrectFieldException;
 import ru.practicum.mainservice.exception.IncorrectObjectException;
 import ru.practicum.mainservice.exception.ObjectNotFoundException;
 import ru.practicum.mainservice.exception.WrongConditionException;
-import ru.practicum.mainservice.request.dto.ParticipationRequestDto;
+import ru.practicum.mainservice.request.dto.EventRequestDto;
 import ru.practicum.mainservice.request.service.RequestService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,6 +28,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/users/{userId}/events")
 public class PrivateEventController {
+
     private final EventService eventService;
     private final RequestService requestService;
 
@@ -74,26 +75,26 @@ public class PrivateEventController {
     }
 
     @PatchMapping("/{eventId}/requests/{reqId}/confirm")
-    public ParticipationRequestDto confirmRequest(@PathVariable Long userId,
-                                                  @PathVariable Long eventId,
-                                                  @PathVariable Long reqId)
+    public EventRequestDto confirmRequest(@PathVariable Long userId,
+                                          @PathVariable Long eventId,
+                                          @PathVariable Long reqId)
             throws WrongConditionException, IncorrectObjectException, IncorrectFieldException, ObjectNotFoundException {
         log.info("User confirm request {}", reqId);
         return requestService.confirmRequestByInitiator(userId, eventId, reqId);
     }
 
     @PatchMapping("/{eventId}/requests/{reqId}/reject")
-    public ParticipationRequestDto rejectRequest(@PathVariable Long userId,
-                                                 @PathVariable Long eventId,
-                                                 @PathVariable Long reqId)
+    public EventRequestDto rejectRequest(@PathVariable Long userId,
+                                         @PathVariable Long eventId,
+                                         @PathVariable Long reqId)
             throws WrongConditionException, IncorrectObjectException, IncorrectFieldException, ObjectNotFoundException {
         log.info("User reject request {}", reqId);
         return requestService.rejectRequestByInitiator(userId, eventId, reqId);
     }
 
     @GetMapping("/{eventId}/requests")
-    public List<ParticipationRequestDto> getRequests(@PathVariable Long userId,
-                                                     @PathVariable Long eventId)
+    public List<EventRequestDto> getRequests(@PathVariable Long userId,
+                                             @PathVariable Long eventId)
             throws IncorrectObjectException, IncorrectFieldException, ObjectNotFoundException {
         log.info("User {} get requests", userId);
         return requestService.getRequestsByInitiator(userId, eventId);

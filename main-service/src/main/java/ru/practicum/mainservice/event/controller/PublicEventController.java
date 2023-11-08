@@ -2,15 +2,13 @@ package ru.practicum.mainservice.event.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpRequest;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.mainservice.event.dto.EventFullDto;
-import ru.practicum.mainservice.event.dto.EventShortDto;
 import ru.practicum.mainservice.event.service.EventService;
 import ru.practicum.mainservice.exception.IncorrectObjectException;
 import ru.practicum.mainservice.exception.ObjectNotFoundException;
 import ru.practicum.mainservice.exception.WrongConditionException;
-import ru.practicum.mainservice.util.EventSort;
+import ru.practicum.mainservice.util.enums.EventSort;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URISyntaxException;
@@ -25,7 +23,7 @@ public class PublicEventController {
     private final EventService eventService;
 
     @GetMapping
-    public List<EventShortDto> getAllEvents(
+    public List<EventFullDto> getAllEvents(
             @RequestParam(required = false) String text,
             @RequestParam(required = false) List<Long> categories,
             @RequestParam(required = false) Boolean paid,

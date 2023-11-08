@@ -10,7 +10,7 @@ import ru.practicum.mainservice.exception.ObjectNotFoundException;
 import ru.practicum.mainservice.exception.WrongConditionException;
 import ru.practicum.mainservice.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.mainservice.request.dto.EventRequestStatusUpdateResult;
-import ru.practicum.mainservice.request.dto.ParticipationRequestDto;
+import ru.practicum.mainservice.request.dto.EventRequestDto;
 import ru.practicum.mainservice.request.service.RequestService;
 
 import javax.validation.Valid;
@@ -26,8 +26,8 @@ public class RequestController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/requests")
-    public ParticipationRequestDto addRequest(@PathVariable("userId") Long userId,
-                                              @RequestParam ("eventId") Long eventId)
+    public EventRequestDto addRequest(@PathVariable("userId") Long userId,
+                                      @RequestParam ("eventId") Long eventId)
             throws WrongConditionException, IncorrectObjectException, IncorrectFieldException, ObjectNotFoundException {
         log.info("Add Request");
         return service.createRequest(userId, eventId);
@@ -43,15 +43,15 @@ public class RequestController {
     }
 
     @PatchMapping("/requests/{requestId}/cancel")
-    public ParticipationRequestDto cancelRequest(@PathVariable(value = "userId") Long userId,
-                                                 @PathVariable(value = "requestId") Long requestId)
+    public EventRequestDto cancelRequest(@PathVariable(value = "userId") Long userId,
+                                         @PathVariable(value = "requestId") Long requestId)
             throws IncorrectObjectException, WrongConditionException, IncorrectFieldException {
         log.info("Cancel request");
         return service.cancelRequest(userId, requestId);
     }
 
     @GetMapping("/requests")
-    public List<ParticipationRequestDto> getRequestsByRequesterId(@PathVariable(value = "userId") Long userId)
+    public List<EventRequestDto> getRequestsByRequesterId(@PathVariable(value = "userId") Long userId)
             throws IncorrectObjectException {
         log.info("Get request by requester id");
         return service.getRequestsByRequesterId(userId);
