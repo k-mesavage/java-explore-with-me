@@ -25,8 +25,8 @@ public class StatController {
     }
 
     @GetMapping("/stats")
-    public List<StatOutputDto> get(@RequestParam(required = false) String start,
-                                   @RequestParam(required = false) String end,
+    public List<StatOutputDto> get(@RequestParam String start,
+                                   @RequestParam String end,
                                    @RequestParam(required = false) List<String> uris,
                                    @RequestParam(defaultValue = "false") boolean unique) {
         log.info("Get hits");

@@ -6,8 +6,10 @@ import java.time.LocalDateTime;
 
 @Service
 public class DateValidator {
+
     public void dateValidation(LocalDateTime start, LocalDateTime end) {
-        if (!(start.isBefore(end) && !start.equals(end))) {
+
+        if (end.isBefore(start)) {
             throw new IllegalArgumentException("StartDate must be before EndDate");
         }
     }

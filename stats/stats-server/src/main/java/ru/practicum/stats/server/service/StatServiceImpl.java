@@ -8,6 +8,7 @@ import ru.practicum.stats.dto.StatOutputDto;
 import ru.practicum.stats.server.mapper.StatMapper;
 import ru.practicum.stats.server.model.Stat;
 import ru.practicum.stats.server.repository.StatServerRepository;
+import ru.practicum.stats.server.validation.DateValidator;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -22,6 +23,7 @@ public class StatServiceImpl implements StatService {
 
     private final StatServerRepository repository;
     private final StatMapper mapper;
+    private final DateValidator dateValidator;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 
@@ -33,6 +35,9 @@ public class StatServiceImpl implements StatService {
 
     public List<StatOutputDto> get(String start, String end, List<String> uris, boolean unique) {
         List<StatOutputDto> result;
+        LocalDateTime startTime = LocalDateTime.parse(URLDecoder.decode(start, StandardCharsets.UTF_8), formatter);
+        LocalDateTime endTime = LocalDateTime.parse(URLDecoder.decode(end, StandardCharsets.UTF_8), formatter);
+        dateValidator.dateValidation(startTime, endTime);
         if (unique) {
             result = repository.getUniqueStats(LocalDateTime.parse(URLDecoder.decode(start, StandardCharsets.UTF_8), formatter),
                     LocalDateTime.parse(URLDecoder.decode(end, StandardCharsets.UTF_8), formatter), uris);
