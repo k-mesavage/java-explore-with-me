@@ -54,7 +54,7 @@ public class RequestServiceImpl implements RequestService {
             eventChecker.checkEventLimit(eventId);
         } catch (IncorrectFieldException e) {
             request.setStatus(REJECTED);
-            mapper.toDto(participationRepository.save(request));
+            participationRepository.save(request);
             throw new IncorrectFieldException("Participants limit for this event has been reached");
         }
         if (event.getParticipantLimit() == 0) {
