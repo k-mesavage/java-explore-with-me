@@ -27,13 +27,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getUsers(List<Long> ids, int from, int size) {
-        PageRequest pageRequest = PageRequest.of(from/size, size);
-        if (ids == null) return repository.findAll(pageRequest).stream().map(mapper::toDto).collect(Collectors.toList());
+        PageRequest pageRequest = PageRequest.of(from / size, size);
+        if (ids == null)
+            return repository.findAll(pageRequest).stream().map(mapper::toDto).collect(Collectors.toList());
         if (ids.isEmpty()) return Collections.emptyList();
         return repository.findByIdIn(ids, pageRequest).stream().map(mapper::toDto).collect(Collectors.toList());
     }
 
-//TODO*
     @Override
     public UserDto createUser(NewUserRequest newUserRequest) throws IncorrectFieldException {
         User user = mapper.toUser(newUserRequest);
@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUserById(Long userId) {
-        if(!repository.existsById(userId)) {
+        if (!repository.existsById(userId)) {
             log.warn("User with id={} was not found!", userId);
             throw new ObjectNotFoundException("User", "Not found");
         }

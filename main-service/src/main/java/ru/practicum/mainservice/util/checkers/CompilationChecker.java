@@ -3,10 +3,8 @@ package ru.practicum.mainservice.util.checkers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.mainservice.compilation.model.Compilation;
-import ru.practicum.mainservice.compilation.repository.CompilationEventRepository;
 import ru.practicum.mainservice.compilation.repository.CompilationRepository;
 import ru.practicum.mainservice.exception.IncorrectObjectException;
-import ru.practicum.mainservice.exception.WrongConditionException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +15,6 @@ import java.util.stream.Collectors;
 public class CompilationChecker {
 
     private final CompilationRepository compilationRepository;
-    private final CompilationEventRepository compilationEventRepository;
 
     public void compilationExist(Long compId) throws IncorrectObjectException {
         final List<Compilation> allCompilations = compilationRepository.findAll();

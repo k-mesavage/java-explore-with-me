@@ -10,6 +10,7 @@ import ru.practicum.mainservice.user.repository.UserRepository;
 public class UserChecker {
 
     private final UserRepository userRepository;
+
     public void checkUserExists(Long userId) throws IncorrectObjectException {
         if (!userRepository.existsById(userId)) {
             throw new IncorrectObjectException("There is no user with id = " + userId);

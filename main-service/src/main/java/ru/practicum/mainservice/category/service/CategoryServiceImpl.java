@@ -13,7 +13,6 @@ import ru.practicum.mainservice.category.repository.CategoryRepository;
 import ru.practicum.mainservice.event.model.Event;
 import ru.practicum.mainservice.event.repository.EventRepository;
 import ru.practicum.mainservice.exception.IncorrectFieldException;
-import ru.practicum.mainservice.exception.IncorrectObjectException;
 import ru.practicum.mainservice.exception.ObjectNotFoundException;
 import ru.practicum.mainservice.util.enums.State;
 import ru.practicum.mainservice.util.checkers.CategoryChecker;
