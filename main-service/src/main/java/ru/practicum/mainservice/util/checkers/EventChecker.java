@@ -80,8 +80,7 @@ public class EventChecker {
 
     public void checkEventLimit(Long eventId) throws IncorrectFieldException {
         Event event = eventRepository.getReferenceById(eventId);
-        if (event.getParticipantLimit() <= event.getConfirmedRequests()
-                && (event.getConfirmedRequests() != 0 && event.getParticipantLimit() != 0)) {
+        if (event.getParticipantLimit() != 0 && Objects.equals(event.getConfirmedRequests(), event.getParticipantLimit())) {
             throw new IncorrectFieldException("Participants limit for this event has been reached");
         }
     }
