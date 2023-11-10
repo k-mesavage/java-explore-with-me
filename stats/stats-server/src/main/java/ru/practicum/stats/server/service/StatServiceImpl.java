@@ -16,6 +16,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import static ru.practicum.stats.client.constants.DateTimeConstant.DATE_TIME_FORMAT;
+
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -24,7 +27,7 @@ public class StatServiceImpl implements StatService {
     private final StatServerRepository repository;
     private final StatMapper mapper;
     private final DateValidator dateValidator;
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
 
 
     public StatDto create(StatDto statDto) {

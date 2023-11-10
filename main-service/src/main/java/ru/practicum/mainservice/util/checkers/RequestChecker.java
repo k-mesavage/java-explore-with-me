@@ -19,48 +19,48 @@ public class RequestChecker {
 
     private final EventRequestRepository repository;
 
-    public void pending(Long reqId) throws WrongConditionException {
+    public void pending(Long reqId) {
         final EventRequest request = repository.getReferenceById(reqId);
         if (!request.getStatus().equals(State.PENDING)) {
             throw new WrongConditionException("Only request in status PENDING can be rejected");
         }
     }
 
-    public void reConfirmed(Long reqId) throws IncorrectFieldException {
+    public void reConfirmed(Long reqId) {
         final EventRequest request = repository.getReferenceById(reqId);
         if (request.getStatus().equals(State.CONFIRMED)) {
             throw new IncorrectFieldException("Request in already in status CONFIRMED");
         }
     }
 
-    public void correctEventRequest(Long eventId, Long reqId) throws IncorrectFieldException {
+    public void correctEventRequest(Long eventId, Long reqId) {
         final EventRequest request = repository.getReferenceById(reqId);
         if (!Objects.equals(request.getEvent().getId(), eventId)) {
             throw new IncorrectFieldException("Incorrect event request");
         }
     }
 
-    public void requestAlreadyExist(Long userId, Long eventId) throws IncorrectFieldException {
+    public void requestAlreadyExist(Long userId, Long eventId) {
         if (repository.existsByRequesterIdAndEventId(userId, eventId)) {
             throw new IncorrectFieldException("Request already exist");
         }
     }
 
-    public void requester(Long userId, Long requestId) throws IncorrectFieldException {
+    public void requester(Long userId, Long requestId) {
         EventRequest request = repository.getReferenceById(requestId);
         if (!Objects.equals(request.getRequester().getId(), userId)) {
             throw new IncorrectFieldException("Requester exception");
         }
     }
 
-    public void canceled(Long requestId) throws WrongConditionException {
+    public void canceled(Long requestId) {
         EventRequest request = repository.getReferenceById(requestId);
         if (request.getStatus().equals(State.CANCELED)) {
             throw new WrongConditionException("Request in already in status CANCELED");
         }
     }
 
-    public void requestExists(Long requestId) throws IncorrectObjectException {
+    public void requestExists(Long requestId) {
         if (!repository.findAll().isEmpty()) {
             List<Long> ids = repository.findAll()
                     .stream()

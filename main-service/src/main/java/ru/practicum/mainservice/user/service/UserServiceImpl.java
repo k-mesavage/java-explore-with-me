@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto createUser(NewUserRequest newUserRequest) throws IncorrectFieldException {
+    public UserDto createUser(NewUserRequest newUserRequest) {
         User user = mapper.toUser(newUserRequest);
         try {
             return mapper.toDto(repository.save(user));

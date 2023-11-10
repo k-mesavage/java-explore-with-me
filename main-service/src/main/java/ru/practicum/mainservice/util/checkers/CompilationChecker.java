@@ -16,7 +16,7 @@ public class CompilationChecker {
 
     private final CompilationRepository compilationRepository;
 
-    public void compilationExist(Long compId) throws IncorrectObjectException {
+    public void compilationExist(Long compId) {
         final List<Compilation> allCompilations = compilationRepository.findAll();
         List<Long> ids = new ArrayList<>();
         if (!allCompilations.isEmpty()) {

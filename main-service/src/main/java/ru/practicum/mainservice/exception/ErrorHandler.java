@@ -12,6 +12,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
+import static ru.practicum.mainservice.util.DateTimeConstant.DATE_TIME_FORMAT;
+
 @Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
@@ -25,7 +27,7 @@ public class ErrorHandler {
                 exception.getMessage(),
                 "OBJECT NOT FOUND",
                 "NOT FOUND",
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
     }
 
     @ExceptionHandler(IncorrectFieldException.class)
@@ -36,7 +38,7 @@ public class ErrorHandler {
                 exception.getMessage(),
                 "INCORRECT FIELD",
                 "CONFLICT",
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
     }
 
     @ExceptionHandler(WrongConditionException.class)
@@ -47,7 +49,7 @@ public class ErrorHandler {
                 exception.getMessage(),
                 "WRONG CONDITION",
                 "BAD REQUEST",
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -58,6 +60,6 @@ public class ErrorHandler {
                 exception.getMessage(),
                 "NOT READABLE",
                 "CONFLICT",
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
     }
 }

@@ -8,10 +8,6 @@ import ru.practicum.mainservice.event.dto.EventFullDto;
 import ru.practicum.mainservice.event.dto.NewEventDto;
 import ru.practicum.mainservice.event.dto.UpdateEventRequestDto;
 import ru.practicum.mainservice.event.service.EventService;
-import ru.practicum.mainservice.exception.IncorrectFieldException;
-import ru.practicum.mainservice.exception.IncorrectObjectException;
-import ru.practicum.mainservice.exception.ObjectNotFoundException;
-import ru.practicum.mainservice.exception.WrongConditionException;
 import ru.practicum.mainservice.request.dto.EventRequestDto;
 import ru.practicum.mainservice.request.service.RequestService;
 
@@ -19,7 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
-import java.sql.SQLException;
 import java.util.List;
 
 @Valid
@@ -35,8 +30,7 @@ public class PrivateEventController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto addEvent(@PathVariable Long userId,
-                                 @Valid @RequestBody NewEventDto newEventDto)
-            throws IncorrectObjectException, SQLException, WrongConditionException, ObjectNotFoundException {
+                                 @Valid @RequestBody NewEventDto newEventDto) {
         log.info("User add event {}", newEventDto);
         return eventService.createEvent(newEventDto, userId);
     }
@@ -44,24 +38,21 @@ public class PrivateEventController {
     @PatchMapping("/{eventId}")
     public EventFullDto updateEvent(@PathVariable Long userId,
                                     @PathVariable Long eventId,
-                                    @Valid @RequestBody UpdateEventRequestDto requestDto)
-            throws WrongConditionException, IncorrectObjectException, IncorrectFieldException, ObjectNotFoundException {
+                                    @Valid @RequestBody UpdateEventRequestDto requestDto) {
         log.info("User update event {}", requestDto);
         return eventService.updateEvent(requestDto, userId, eventId);
     }
 
     @DeleteMapping("/{eventId}")
     public EventFullDto cancelEvent(@PathVariable Long userId,
-                                    @PathVariable Long eventId)
-            throws IncorrectObjectException, IncorrectFieldException, ObjectNotFoundException {
+                                    @PathVariable Long eventId) {
         log.info("User cancel event {}", eventId);
         return eventService.cancelEvent(userId, eventId);
     }
 
     @GetMapping("/{eventId}")
     public EventFullDto getEvent(@PathVariable Long userId,
-                                            @PathVariable Long eventId)
-            throws IncorrectObjectException, IncorrectFieldException, ObjectNotFoundException {
+                                            @PathVariable Long eventId) {
         log.info("User get event {} by initiator {}", userId, eventId);
         return eventService.getEventByInitiator(userId, eventId);
     }
@@ -70,15 +61,14 @@ public class PrivateEventController {
     public List<EventFullDto> getEventsByInitiator(@PathVariable Long userId,
                                                    @PositiveOrZero @RequestParam(defaultValue = "0") int from,
                                                    @Positive @RequestParam(defaultValue = "10") int size,
-                                                   HttpServletRequest request) throws IncorrectObjectException {
+                                                   HttpServletRequest request) {
         return eventService.getEventsByInitiator(userId, from, size, request);
     }
 
     @PatchMapping("/{eventId}/requests/{reqId}/confirm")
     public EventRequestDto confirmRequest(@PathVariable Long userId,
                                           @PathVariable Long eventId,
-                                          @PathVariable Long reqId)
-            throws WrongConditionException, IncorrectObjectException, IncorrectFieldException, ObjectNotFoundException {
+                                          @PathVariable Long reqId) {
         log.info("User confirm request {}", reqId);
         return requestService.confirmRequestByInitiator(userId, eventId, reqId);
     }
@@ -86,16 +76,14 @@ public class PrivateEventController {
     @PatchMapping("/{eventId}/requests/{reqId}/reject")
     public EventRequestDto rejectRequest(@PathVariable Long userId,
                                          @PathVariable Long eventId,
-                                         @PathVariable Long reqId)
-            throws WrongConditionException, IncorrectObjectException, IncorrectFieldException, ObjectNotFoundException {
+                                         @PathVariable Long reqId) {
         log.info("User reject request {}", reqId);
         return requestService.rejectRequestByInitiator(userId, eventId, reqId);
     }
 
     @GetMapping("/{eventId}/requests")
     public List<EventRequestDto> getRequests(@PathVariable Long userId,
-                                             @PathVariable Long eventId)
-            throws IncorrectObjectException, IncorrectFieldException, ObjectNotFoundException {
+                                             @PathVariable Long eventId) {
         log.info("User {} get requests", userId);
         return requestService.getRequestsByInitiator(userId, eventId);
     }

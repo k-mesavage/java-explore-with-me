@@ -5,13 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.mainservice.event.dto.EventFullDto;
 import ru.practicum.mainservice.event.service.EventService;
-import ru.practicum.mainservice.exception.IncorrectObjectException;
-import ru.practicum.mainservice.exception.ObjectNotFoundException;
-import ru.practicum.mainservice.exception.WrongConditionException;
 import ru.practicum.mainservice.util.enums.EventSort;
 
 import javax.servlet.http.HttpServletRequest;
-import java.net.URISyntaxException;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @Slf4j
@@ -31,9 +29,9 @@ public class PublicEventController {
             @RequestParam(required = false) String rangeEnd,
             @RequestParam(defaultValue = "false") Boolean onlyAvailable,
             @RequestParam(required = false) EventSort sort,
-            @RequestParam(defaultValue = "0") int from,
-            @RequestParam(defaultValue = "10") int size,
-            HttpServletRequest httpRequest) throws WrongConditionException, URISyntaxException {
+            @PositiveOrZero @RequestParam(defaultValue = "0") int from,
+            @Positive @RequestParam(defaultValue = "10") int size,
+            HttpServletRequest httpRequest) {
 
         log.info("Public get all events");
         return eventService.getEvents(
@@ -42,8 +40,7 @@ public class PublicEventController {
 
     @GetMapping("/{eventId}")
     public EventFullDto getEventById(@PathVariable Long eventId,
-                                     HttpServletRequest httpServletRequest)
-            throws IncorrectObjectException, URISyntaxException, ObjectNotFoundException {
+                                     HttpServletRequest httpServletRequest) {
         log.info("Public get event {}", eventId);
         return eventService.getEventById(eventId, httpServletRequest);
     }

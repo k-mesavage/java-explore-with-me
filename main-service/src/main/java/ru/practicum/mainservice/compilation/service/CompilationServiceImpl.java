@@ -9,7 +9,6 @@ import ru.practicum.mainservice.compilation.model.Compilation;
 import ru.practicum.mainservice.compilation.repository.CompilationRepository;
 import ru.practicum.mainservice.event.model.Event;
 import ru.practicum.mainservice.event.repository.EventRepository;
-import ru.practicum.mainservice.exception.IncorrectObjectException;
 import ru.practicum.mainservice.exception.ObjectNotFoundException;
 import ru.practicum.mainservice.util.checkers.CompilationChecker;
 
@@ -35,7 +34,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    public CompilationDto updateCompilation(Long compId, NewCompilationDto compilationDto) throws ObjectNotFoundException {
+    public CompilationDto updateCompilation(Long compId, NewCompilationDto compilationDto) {
         Compilation compilation = compilationRepository.findById(compId).orElseThrow(
                 () -> new ObjectNotFoundException("Compilation not found"));
         if (compilationDto.getEvents() != null) {
@@ -50,7 +49,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    public CompilationDto getCompilationById(Long compId) throws ObjectNotFoundException {
+    public CompilationDto getCompilationById(Long compId) {
         final Compilation compilation = compilationRepository.findById(compId).orElseThrow(
                 () -> new ObjectNotFoundException("Compilation not found"));
         return compilationMapper.toDto(compilation);
@@ -63,7 +62,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    public void deleteCompilationById(Long compId) throws IncorrectObjectException {
+    public void deleteCompilationById(Long compId) {
         compilationChecker.compilationExist(compId);
         compilationRepository.deleteById(compId);
     }

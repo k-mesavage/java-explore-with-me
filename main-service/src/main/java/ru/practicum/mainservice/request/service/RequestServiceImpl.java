@@ -5,9 +5,6 @@ import org.springframework.stereotype.Service;
 import ru.practicum.mainservice.event.model.Event;
 import ru.practicum.mainservice.event.repository.EventRepository;
 import ru.practicum.mainservice.exception.IncorrectFieldException;
-import ru.practicum.mainservice.exception.IncorrectObjectException;
-import ru.practicum.mainservice.exception.ObjectNotFoundException;
-import ru.practicum.mainservice.exception.WrongConditionException;
 import ru.practicum.mainservice.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.mainservice.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.mainservice.request.dto.EventRequestDto;
@@ -38,8 +35,7 @@ public class RequestServiceImpl implements RequestService {
     private final RequestMapper mapper;
 
     @Override
-    public EventRequestDto createRequest(Long userId, Long eventId)
-            throws IncorrectObjectException, ObjectNotFoundException, IncorrectFieldException {
+    public EventRequestDto createRequest(Long userId, Long eventId) {
         userChecker.checkUserExists(userId);
         eventChecker.eventExist(eventId);
         eventChecker.eventInitiatorIsNot(eventId, userId);
@@ -68,8 +64,9 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public EventRequestStatusUpdateResult patchRequest(EventRequestStatusUpdateRequest updateRequest, Long userId, Long eventId)
-            throws IncorrectFieldException {
+    public EventRequestStatusUpdateResult patchRequest(EventRequestStatusUpdateRequest updateRequest,
+                                                       Long userId,
+                                                       Long eventId) {
         Event event = eventRepository.getReferenceById(eventId);
         eventChecker.eventInitiator(eventId, userId);
         long eventConfirmedRequests = eventRequestRepository.getEventRequestCountByStatus(eventId, State.CONFIRMED);
@@ -115,7 +112,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public EventRequestDto cancelRequest(Long userId, Long requestId) throws IncorrectObjectException, IncorrectFieldException, WrongConditionException {
+    public EventRequestDto cancelRequest(Long userId, Long requestId) {
         userChecker.checkUserExists(userId);
         requestChecker.requestExists(requestId);
         requestChecker.requester(userId, requestId);
@@ -126,14 +123,13 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public List<EventRequestDto> getRequestsByRequesterId(Long userId) throws IncorrectObjectException {
+    public List<EventRequestDto> getRequestsByRequesterId(Long userId) {
         userChecker.checkUserExists(userId);
         return mapper.toDtosList(eventRequestRepository.findAllByRequesterId(userId));
     }
 
     @Override
-    public EventRequestDto confirmRequestByInitiator(Long userId, Long eventId, Long reqId)
-            throws IncorrectObjectException, IncorrectFieldException, ObjectNotFoundException {
+    public EventRequestDto confirmRequestByInitiator(Long userId, Long eventId, Long reqId) {
         userChecker.checkUserExists(userId);
         eventChecker.eventExist(eventId);
         requestChecker.requestExists(reqId);
@@ -149,8 +145,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public EventRequestDto rejectRequestByInitiator(Long userId, Long eventId, Long reqId)
-            throws IncorrectObjectException, IncorrectFieldException, WrongConditionException, ObjectNotFoundException {
+    public EventRequestDto rejectRequestByInitiator(Long userId, Long eventId, Long reqId) {
         userChecker.checkUserExists(userId);
         eventChecker.eventExist(eventId);
         requestChecker.requestExists(reqId);
@@ -163,8 +158,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public List<EventRequestDto> getRequestsByInitiator(Long userId, Long eventId)
-            throws IncorrectObjectException, IncorrectFieldException, ObjectNotFoundException {
+    public List<EventRequestDto> getRequestsByInitiator(Long userId, Long eventId) {
         userChecker.checkUserExists(userId);
         eventChecker.eventExist(eventId);
         eventChecker.eventInitiator(eventId, userId);

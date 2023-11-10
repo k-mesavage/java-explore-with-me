@@ -11,7 +11,7 @@ public class UserChecker {
 
     private final UserRepository userRepository;
 
-    public void checkUserExists(Long userId) throws IncorrectObjectException {
+    public void checkUserExists(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new IncorrectObjectException("There is no user with id = " + userId);
         }

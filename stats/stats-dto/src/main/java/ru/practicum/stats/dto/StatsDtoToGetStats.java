@@ -12,10 +12,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StatsDtoToGetStats {
-    String start;
-    String end;
-    List<String> uris;
-    boolean unique;
-    Integer from;
-    Integer size;
+    private String start;
+    private String end;
+    private List<String> uris;
+    private boolean unique;
+    private Integer from;
+    private Integer size;
 }

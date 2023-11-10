@@ -5,8 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.mainservice.category.dto.CategoryDto;
 import ru.practicum.mainservice.category.service.CategoryService;
-import ru.practicum.mainservice.exception.IncorrectObjectException;
-import ru.practicum.mainservice.exception.ObjectNotFoundException;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -29,7 +27,7 @@ public class PublicCategoryController {
     }
 
     @GetMapping("/{catId}")
-    public CategoryDto getCategoryById(@PathVariable @NotNull Long catId) throws IncorrectObjectException, ObjectNotFoundException {
+    public CategoryDto getCategoryById(@PathVariable @NotNull Long catId) {
         log.info("Get category with id {}", catId);
         return categoryService.getCategoryById(catId);
     }

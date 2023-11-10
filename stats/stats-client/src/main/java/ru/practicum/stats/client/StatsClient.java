@@ -9,6 +9,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.stats.dto.StatDto;
 import ru.practicum.stats.dto.StatOutputDto;
 import ru.practicum.stats.dto.StatsDtoToGetStats;
+import static ru.practicum.stats.client.constants.DateTimeConstant.DATE_TIME_FORMAT;
+
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -16,7 +18,7 @@ import java.util.List;
 @Service
 public class StatsClient {
 
-    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
 
     WebClient webClient = WebClient.create();
 

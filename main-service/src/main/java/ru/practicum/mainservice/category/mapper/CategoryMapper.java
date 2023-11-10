@@ -5,8 +5,8 @@ import ru.practicum.mainservice.category.dto.CategoryDto;
 import ru.practicum.mainservice.category.dto.NewCategoryDto;
 import ru.practicum.mainservice.category.model.Category;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CategoryMapper {
@@ -25,10 +25,6 @@ public class CategoryMapper {
     }
 
     public List<CategoryDto> toDtosList(List<Category> categories) {
-        List<CategoryDto> categoryDtoList = new ArrayList<>();
-        for (Category c : categories) {
-            categoryDtoList.add(toDto(c));
-        }
-        return categoryDtoList;
+        return categories.stream().map(this::toDto).collect(Collectors.toList());
     }
 }

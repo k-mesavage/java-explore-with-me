@@ -7,11 +7,9 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.mainservice.category.dto.CategoryDto;
 import ru.practicum.mainservice.category.dto.NewCategoryDto;
 import ru.practicum.mainservice.category.service.CategoryService;
-import ru.practicum.mainservice.exception.IncorrectFieldException;
-import ru.practicum.mainservice.exception.IncorrectObjectException;
-import ru.practicum.mainservice.exception.ObjectNotFoundException;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 @Slf4j
 @RestController
@@ -23,16 +21,15 @@ public class AdminCategoryController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CategoryDto addCategory(@RequestBody @Valid NewCategoryDto newCategoryDto) throws IncorrectFieldException {
+    public CategoryDto addCategory(@RequestBody @Valid NewCategoryDto newCategoryDto) {
         final CategoryDto categoryDto = service.addCategory(newCategoryDto);
         log.info("Add category {}", categoryDto);
         return categoryDto;
     }
 
     @PatchMapping("/{catId}")
-    public CategoryDto updateCategory(@PathVariable Long catId,
-            @RequestBody @Valid CategoryDto categoryDto)
-            throws IncorrectObjectException, IncorrectFieldException, ObjectNotFoundException {
+    public CategoryDto updateCategory(@PathVariable @NotNull Long catId,
+            @RequestBody @Valid CategoryDto categoryDto) {
         log.info("Update category {}", categoryDto);
         categoryDto = service.updateCategory(catId, categoryDto);
         return categoryDto;
@@ -40,7 +37,7 @@ public class AdminCategoryController {
 
     @DeleteMapping("/{catId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCategory(@PathVariable Long catId) throws IncorrectObjectException, IncorrectFieldException {
+    public void deleteCategory(@PathVariable Long catId) {
         log.info("Delete category with id {}", catId);
         service.deleteCategory(catId);
     }

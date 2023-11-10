@@ -13,7 +13,6 @@ import ru.practicum.mainservice.category.repository.CategoryRepository;
 import ru.practicum.mainservice.event.model.Event;
 import ru.practicum.mainservice.event.repository.EventRepository;
 import ru.practicum.mainservice.exception.IncorrectFieldException;
-import ru.practicum.mainservice.exception.ObjectNotFoundException;
 import ru.practicum.mainservice.util.enums.State;
 import ru.practicum.mainservice.util.checkers.CategoryChecker;
 
@@ -31,7 +30,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryMapper mapper;
 
     @Override
-    public CategoryDto addCategory(NewCategoryDto newCategoryDto) throws IncorrectFieldException {
+    public CategoryDto addCategory(NewCategoryDto newCategoryDto) {
         Category newCategory = mapper.toCategory(newCategoryDto);
         try {
             newCategory = categoryRepository.save(newCategory);
@@ -43,21 +42,19 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDto> getCategories(int from, int size) {
-        categoryChecker.checkCorrectParams(from, size);
         final List<Category> categories = categoryRepository.findAll(PageRequest.of(from, size)).stream().collect(Collectors.toList());
         return mapper.toDtosList(categories);
     }
 
     @Override
-    public CategoryDto getCategoryById(Long catId) throws ObjectNotFoundException {
+    public CategoryDto getCategoryById(Long catId) {
         categoryChecker.categoryExist(catId);
         return mapper.toDto(categoryRepository.getReferenceById(catId));
     }
 
     @Override
-    public CategoryDto updateCategory(Long catId, CategoryDto categoryDto) throws IncorrectFieldException, ObjectNotFoundException {
+    public CategoryDto updateCategory(Long catId, CategoryDto categoryDto) {
         categoryChecker.categoryExist(catId);
-        categoryChecker.idIsNotBlank(catId);
         final Category updatedCategory = categoryRepository.getReferenceById(catId);
         if (categoryDto.getName() != null) {
             updatedCategory.setName(categoryDto.getName());
@@ -70,7 +67,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void deleteCategory(Long categoryId) throws IncorrectFieldException {
+    public void deleteCategory(Long categoryId) {
         List<Event> events = eventRepository.findAllByCategoryIdInAndEventDateIsAfter(List.of(categoryId),
                 LocalDateTime.now(), Pageable.unpaged());
         if (!events.isEmpty()) {
