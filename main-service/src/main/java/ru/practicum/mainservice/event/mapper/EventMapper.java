@@ -11,7 +11,9 @@ import ru.practicum.mainservice.event.dto.NewEventDto;
 import ru.practicum.mainservice.event.dto.UpdateEventRequestDto;
 import ru.practicum.mainservice.event.model.Event;
 import ru.practicum.mainservice.location.model.Location;
+import ru.practicum.mainservice.rating.repository.RatingRepository;
 import ru.practicum.mainservice.user.dto.UserShortDto;
+import ru.practicum.mainservice.util.enums.RatingType;
 import ru.practicum.mainservice.util.enums.State;
 import ru.practicum.mainservice.util.enums.StateAction;
 
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 public class EventMapper {
 
     private final CategoryRepository categoryRepository;
+    private final RatingRepository ratingRepository;
 
     public Event toEvent(NewEventDto newEventDto) {
         Event event = new Event();
@@ -41,6 +44,7 @@ public class EventMapper {
         event.setState(State.PENDING);
         event.setViews(0L);
         event.setPublishedOn(LocalDateTime.now());
+        event.setRating(event.getRating());
         return event;
     }
 
@@ -61,7 +65,11 @@ public class EventMapper {
                 .requestModeration(event.getRequestModeration())
                 .state(event.getState())
                 .title(event.getTitle())
-                .views(event.getViews()).build();
+                .views(event.getViews())
+                .rating(event.getRating())
+                .likes(ratingRepository.countAllByEventIdAndType(event.getId(), RatingType.LIKE))
+                .dislikes(ratingRepository.countAllByEventIdAndType(event.getId(), RatingType.DISLIKE))
+                .build();
     }
 
     public List<EventFullDto> toListOfEventFullDto(List<Event> events) {
