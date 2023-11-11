@@ -7,13 +7,13 @@ services:
       - "6540:5432"
     environment:
       - POSTGRES_DB=ewm
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=root
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
       - POSTGRES_HOST=stats-db
       - POSTGRES_PORT=5432
       - TZ=Europe/Moscow
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U root -d explorewithme" ]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d ewm" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -25,20 +25,20 @@ services:
       - "6541:5432"
     environment:
       - POSTGRES_DB=ewm
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=root
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
       - POSTGRES_HOST=ewm-db
       - POSTGRES_PORT=5432
       - TZ=Europe/Moscow
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U root -d explorewithme" ]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d ewm" ]
       interval: 5s
       timeout: 5s
       retries: 5
 
   stats-server:
     build: ./stats/stats-server
-    image: stats-server-dock
+    image: stats-server
     container_name: stats-server
     ports:
       - "9090:9090"
@@ -50,12 +50,12 @@ services:
         condition: service_healthy
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/ewm
-      - SPRING_DATASOURCE_USER=root
-      - SPRING_DATASOURCE_PASS=root
+      - SPRING_DATASOURCE_USER=postgres
+      - SPRING_DATASOURCE_PASS=admin
 
   ewm-service:
     build: ./main-service
-    image: ewm-service-dock
+    image: ewm-service
     container_name: ewm-service
     ports:
       - "8080:8080"
@@ -67,5 +67,5 @@ services:
         condition: service_healthy
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm
-      - SPRING_DATASOURCE_USER=root
-      - SPRING_DATASOURCE_PASS=root
+      - SPRING_DATASOURCE_USER=postgres
+      - SPRING_DATASOURCE_PASS=admin

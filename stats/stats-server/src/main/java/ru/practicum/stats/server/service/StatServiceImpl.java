@@ -10,9 +10,14 @@ import ru.practicum.stats.server.model.Stat;
 import ru.practicum.stats.server.repository.StatServerRepository;
 import ru.practicum.stats.server.validation.DateValidator;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
+
+import static ru.practicum.stats.client.constants.DateTimeConstant.DATE_TIME_FORMAT;
+
 
 @Slf4j
 @Service
@@ -20,22 +25,28 @@ import java.util.Optional;
 public class StatServiceImpl implements StatService {
 
     private final StatServerRepository repository;
-    private final DateValidator validator;
     private final StatMapper mapper;
+    private final DateValidator dateValidator;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
+
 
     public StatDto create(StatDto statDto) {
-        Stat result = Optional.of(repository.save(mapper.toStat(statDto))).orElseThrow();
+        Stat result = repository.save(mapper.toStat(statDto));
         log.info("Hit {} added.", statDto);
         return mapper.toDto(result);
     }
 
-    public List<StatOutputDto> get(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
-        validator.dateValidation(start, end);
+    public List<StatOutputDto> get(String start, String end, List<String> uris, boolean unique) {
         List<StatOutputDto> result;
+        LocalDateTime startTime = LocalDateTime.parse(URLDecoder.decode(start, StandardCharsets.UTF_8), formatter);
+        LocalDateTime endTime = LocalDateTime.parse(URLDecoder.decode(end, StandardCharsets.UTF_8), formatter);
+        dateValidator.dateValidation(startTime, endTime);
         if (unique) {
-            result = repository.getUniqueStats(start, end, uris);
+            result = repository.getUniqueStats(LocalDateTime.parse(URLDecoder.decode(start, StandardCharsets.UTF_8), formatter),
+                    LocalDateTime.parse(URLDecoder.decode(end, StandardCharsets.UTF_8), formatter), uris);
         } else {
-            result = repository.getStats(start, end, uris);
+            result = repository.getStats(LocalDateTime.parse(URLDecoder.decode(start, StandardCharsets.UTF_8), formatter),
+                    LocalDateTime.parse(URLDecoder.decode(end, StandardCharsets.UTF_8), formatter), uris);
         }
         log.info("Found {} endpoint hits", result.size());
         return result;
