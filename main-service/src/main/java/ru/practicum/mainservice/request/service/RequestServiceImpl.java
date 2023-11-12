@@ -41,6 +41,7 @@ public class RequestServiceImpl implements RequestService {
         eventChecker.eventInitiatorIsNot(eventId, userId);
         requestChecker.requestAlreadyExist(userId, eventId);
         eventChecker.eventPublished(eventId);
+        eventChecker.eventPublishedState(eventId);
         EventRequest request = new EventRequest();
         request.setRequester(userRepository.getReferenceById(userId));
         request.setCreated(LocalDateTime.now());

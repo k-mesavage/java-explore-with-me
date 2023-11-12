@@ -81,6 +81,7 @@ public class EventServiceImpl implements EventService {
         }
         if (requestDto.getStateAction() != null) {
             eventChecker.eventNotPublished(event);
+            eventChecker.eventPublished(event);
             if (event.getState().equals(State.CANCELED) && stateAction.equals(StateAction.SEND_TO_REVIEW)) {
                 event.setState(State.PENDING);
                 return eventMapper.toEventFullDto(eventRepository.save(event));
@@ -290,6 +291,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private List<Event> getEventViewsList(List<Event> events) {
+    List<Event> getEventViewsList(List<Event> events) {
         String eventUri = "/events/";
         List<String> uriEventList = events.stream()
                 .map(e -> eventUri + e.getId().toString())

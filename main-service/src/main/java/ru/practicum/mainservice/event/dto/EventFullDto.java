@@ -59,4 +59,5 @@ public class EventFullDto {
     private int likes = 0;
 
     private int dislikes = 0;
+
 }
