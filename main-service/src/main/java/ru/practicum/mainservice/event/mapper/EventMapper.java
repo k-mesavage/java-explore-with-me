@@ -15,7 +15,6 @@ import ru.practicum.mainservice.rating.model.Rating;
 import ru.practicum.mainservice.rating.repository.RatingRepository;
 import ru.practicum.mainservice.user.dto.UserShortDto;
 import ru.practicum.mainservice.util.enums.RatingType;
-import ru.practicum.mainservice.user.dto.UserShortDto;
 import ru.practicum.mainservice.util.enums.State;
 import ru.practicum.mainservice.util.enums.StateAction;
 
@@ -77,7 +76,6 @@ public class EventMapper {
                 .likes(event.getLikes())
                 .dislikes(event.getDislikes())
                 .build();
-                .views(event.getViews()).build();
     }
 
     public List<EventFullDto> toListOfEventFullDto(List<Event> events) {
