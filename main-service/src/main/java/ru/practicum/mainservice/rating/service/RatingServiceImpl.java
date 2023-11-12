@@ -36,12 +36,4 @@ public class RatingServiceImpl implements RatingService {
         eventRepository.save(event);
         ratingRepository.save(rating);
     }
-
-    @Override
-    public void removeUserRating(Long eventId, Long userId) {
-        final Rating rating = ratingRepository.getRatingByEventIdAndUserId(eventId, userId);
-        Event event = eventRepository.getReferenceById(rating.getEventId());
-        ratingRepository.delete(rating);
-        eventRepository.save(event);
-    }
 }

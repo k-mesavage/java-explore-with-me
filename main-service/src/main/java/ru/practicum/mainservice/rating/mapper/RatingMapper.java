@@ -1,7 +1,6 @@
 package ru.practicum.mainservice.rating.mapper;
 
 import org.springframework.stereotype.Service;
-import ru.practicum.mainservice.event.model.Event;
 import ru.practicum.mainservice.rating.model.Rating;
 import ru.practicum.mainservice.util.enums.RatingType;
 
