@@ -54,9 +54,9 @@ public class EventFullDto {
 
     private boolean requestModeration;
 
-    private Long rating;
+    private int rating = 0;
 
-    private Long likes;
+    private int likes = 0;
 
-    private Long dislikes;
+    private int dislikes = 0;
 }

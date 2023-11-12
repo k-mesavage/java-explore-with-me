@@ -25,4 +25,7 @@ public class Rating {
 
     @Column(name = "type")
     private RatingType type;
+
+    @Column(name = "value")
+    private int value;
 }

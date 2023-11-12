@@ -12,6 +12,7 @@ import ru.practicum.mainservice.event.model.Event;
 import ru.practicum.mainservice.event.repository.EventRepository;
 import ru.practicum.mainservice.exception.ObjectNotFoundException;
 import ru.practicum.mainservice.exception.WrongConditionException;
+import ru.practicum.mainservice.rating.repository.RatingRepository;
 import ru.practicum.mainservice.user.model.User;
 import ru.practicum.mainservice.user.repository.UserRepository;
 import ru.practicum.mainservice.util.checkers.CategoryChecker;
@@ -49,6 +50,7 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
     private final StatsClient statsClient = new StatsClient();
+    private final RatingRepository ratingRepository;
 
     @Override
     public EventFullDto createEvent(NewEventDto newEventDto, Long userId) {
@@ -78,7 +80,7 @@ public class EventServiceImpl implements EventService {
             eventChecker.isEventDateBeforeTwoHours(requestDto.getEventDate());
         }
         if (requestDto.getStateAction() != null) {
-            eventChecker.eventPublished(event);
+            eventChecker.eventNotPublished(event);
             if (event.getState().equals(State.CANCELED) && stateAction.equals(StateAction.SEND_TO_REVIEW)) {
                 event.setState(State.PENDING);
                 return eventMapper.toEventFullDto(eventRepository.save(event));
@@ -287,7 +289,7 @@ public class EventServiceImpl implements EventService {
         return statsList.isEmpty() ? 0 : statsList.get(0).getHits();
     }
 
-    List<Event> getEventViewsList(List<Event> events) {
+    private List<Event> getEventViewsList(List<Event> events) {
         String eventUri = "/events/";
         List<String> uriEventList = events.stream()
                 .map(e -> eventUri + e.getId().toString())

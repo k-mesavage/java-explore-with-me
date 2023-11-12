@@ -8,29 +8,21 @@ import ru.practicum.mainservice.util.enums.RatingType;
 @Service
 public class RatingMapper {
 
-    public Rating addLike(Long eventId, Long userId, Event event) {
-        event.setRating(event.getRating() + 1);
+    public Rating addLike(Long eventId, Long userId) {
         Rating rating = new Rating();
         rating.setEventId(eventId);
         rating.setUserId(userId);
         rating.setType(RatingType.LIKE);
+        rating.setValue(1);
         return rating;
     }
 
-    public Rating addDislike(Long eventId, Long userId, Event event) {
-        event.setRating(event.getRating() - 1);
+    public Rating addDislike(Long eventId, Long userId) {
         Rating rating = new Rating();
         rating.setEventId(eventId);
         rating.setUserId(userId);
         rating.setType(RatingType.DISLIKE);
+        rating.setValue(-1);
         return rating;
-    }
-
-    public void removeRating(RatingType type, Event event) {
-        if (type.equals(RatingType.LIKE)) {
-            event.setRating(event.getRating() - 1);
-        } else {
-            event.setRating(event.getRating() + 1);
-        }
     }
 }

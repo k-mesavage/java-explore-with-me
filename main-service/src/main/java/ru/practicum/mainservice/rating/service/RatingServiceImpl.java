@@ -24,14 +24,14 @@ public class RatingServiceImpl implements RatingService {
     @Override
     public void addRatingToEvent(Long eventId, Long userId, RatingType ratingType) {
         Event event = eventRepository.getReferenceById(eventId);
-        eventChecker.eventPublished(event);
+        eventChecker.eventPublished(event.getId());
         eventChecker.eventInitiatorIsNot(eventId, userId);
         ratingChecker.reRate(eventId, userId);
         Rating rating;
         if (ratingType.equals(RatingType.LIKE)) {
-            rating = ratingMapper.addLike(eventId, userId, event);
+            rating = ratingMapper.addLike(eventId, userId);
         } else {
-            rating = ratingMapper.addDislike(eventId, userId, event);
+            rating = ratingMapper.addDislike(eventId, userId);
         }
         eventRepository.save(event);
         ratingRepository.save(rating);
@@ -41,7 +41,6 @@ public class RatingServiceImpl implements RatingService {
     public void removeUserRating(Long eventId, Long userId) {
         final Rating rating = ratingRepository.getRatingByEventIdAndUserId(eventId, userId);
         Event event = eventRepository.getReferenceById(rating.getEventId());
-        ratingMapper.removeRating(rating.getType(), event);
         ratingRepository.delete(rating);
         eventRepository.save(event);
     }

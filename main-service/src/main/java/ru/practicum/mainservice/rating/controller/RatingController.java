@@ -27,11 +27,4 @@ public class RatingController {
         log.info("User {} add dislike to event {}", userId, eventId);
         service.addRatingToEvent(eventId, userId, RatingType.DISLIKE);
     }
-
-    @DeleteMapping("/rating")
-    public void deleteUserRating(@PathVariable Long eventId,
-                                 @PathVariable Long userId) {
-        log.info("User {} delete rating from event {}", userId, eventId);
-        service.removeUserRating(eventId, userId);
-    }
 }
