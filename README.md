@@ -4,7 +4,7 @@ Explore With Me:
 
 ![main-service/src/main/resources/explore_with_me_main_pic.jpg](main-service/src/main/resources/explore_with_me_main_pic.jpg)  
 
-Oneboard service for explore locations and enjoy funny time!
+One-board service for explore locations and enjoy funny time!
 
 •Find event  
 •Send request  
