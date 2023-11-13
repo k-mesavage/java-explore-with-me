@@ -1,4 +1,4 @@
-ЦC: [https://github.com/k-mesavage/java-explore-with-me/pull/5/](https://github.com/k-mesavage/java-explore-with-me/pull/6)
+ЦC: https://github.com/k-mesavage/java-explore-with-me/pull/6
 
 Explore With Me:  
 
