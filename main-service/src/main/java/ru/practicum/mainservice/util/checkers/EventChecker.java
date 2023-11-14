@@ -32,12 +32,6 @@ public class EventChecker {
         }
     }
 
-    public void eventPublished(Event event) {
-        if (event.getState().equals(State.PUBLISHED)) {
-            throw new IncorrectFieldException("Event already published");
-        }
-    }
-
     public void statusForAdminUpdate(Event event, UpdateEventRequestDto requestDto) {
         StateAction stateAction = requestDto.getStateAction();
         if (stateAction != null) {
@@ -65,7 +59,7 @@ public class EventChecker {
         }
     }
 
-    public void eventPublishedState(Long eventId) {
+    public void eventPublished(Long eventId) {
         Event event = eventRepository.getReferenceById(eventId);
         if (!event.getState().equals(State.PUBLISHED)) {
             throw new IncorrectFieldException("It is impossible to create a request to not PUBLISHED event");

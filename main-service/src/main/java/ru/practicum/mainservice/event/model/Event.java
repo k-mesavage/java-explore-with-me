@@ -63,4 +63,10 @@ public class Event {
     private String title;
 
     private Long views;
+
+    private int rating = 0;
+
+    private int likes = 0;
+
+    private int dislikes = 0;
 }

@@ -11,12 +11,16 @@ import ru.practicum.mainservice.event.dto.NewEventDto;
 import ru.practicum.mainservice.event.dto.UpdateEventRequestDto;
 import ru.practicum.mainservice.event.model.Event;
 import ru.practicum.mainservice.location.model.Location;
+import ru.practicum.mainservice.rating.model.Rating;
+import ru.practicum.mainservice.rating.repository.RatingRepository;
 import ru.practicum.mainservice.user.dto.UserShortDto;
+import ru.practicum.mainservice.util.enums.RatingType;
 import ru.practicum.mainservice.util.enums.State;
 import ru.practicum.mainservice.util.enums.StateAction;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +28,8 @@ import java.util.stream.Collectors;
 public class EventMapper {
 
     private final CategoryRepository categoryRepository;
+
+    private final RatingRepository ratingRepository;
 
     public Event toEvent(NewEventDto newEventDto) {
         Event event = new Event();
@@ -41,10 +47,14 @@ public class EventMapper {
         event.setState(State.PENDING);
         event.setViews(0L);
         event.setPublishedOn(LocalDateTime.now());
+        event.setRating(event.getRating());
         return event;
     }
 
     public EventFullDto toEventFullDto(Event event) {
+        event.setRating(getEventRating(event.getId()));
+        event.setLikes(getLikes(event.getId()));
+        event.setDislikes(getDislikes(event.getId()));
         return EventFullDto.builder()
                 .id(event.getId())
                 .annotation(event.getAnnotation())
@@ -61,7 +71,11 @@ public class EventMapper {
                 .requestModeration(event.getRequestModeration())
                 .state(event.getState())
                 .title(event.getTitle())
-                .views(event.getViews()).build();
+                .views(event.getViews())
+                .rating(event.getRating())
+                .likes(event.getLikes())
+                .dislikes(event.getDislikes())
+                .build();
     }
 
     public List<EventFullDto> toListOfEventFullDto(List<Event> events) {
@@ -114,5 +128,27 @@ public class EventMapper {
             event.setTitle(requestDto.getTitle());
         }
         return event;
+    }
+
+    private int getEventRating(Long eventId) {
+        final List<Rating> allRatings = ratingRepository.findAllByEventId(eventId);
+        AtomicInteger rating = new AtomicInteger();
+        allRatings.stream().filter(r -> r.getType().equals(RatingType.LIKE)).forEach(r -> rating.getAndIncrement());
+        allRatings.stream().filter(r -> r.getType().equals(RatingType.DISLIKE)).forEach(r -> rating.getAndDecrement());
+        return rating.get();
+    }
+
+    private int getLikes(Long eventId) {
+        final List<Rating> allRatings = ratingRepository.findAllByEventId(eventId);
+        AtomicInteger rating = new AtomicInteger();
+        allRatings.stream().filter(r -> r.getType().equals(RatingType.LIKE)).forEach(r -> rating.getAndIncrement());
+        return rating.get();
+    }
+
+    private int getDislikes(Long eventId) {
+        final List<Rating> allRatings = ratingRepository.findAllByEventId(eventId);
+        AtomicInteger rating = new AtomicInteger();
+        allRatings.stream().filter(r -> r.getType().equals(RatingType.DISLIKE)).forEach(r -> rating.getAndIncrement());
+        return rating.get();
     }
 }

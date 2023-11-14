@@ -72,13 +72,11 @@ public class EventServiceImpl implements EventService {
         eventChecker.notPublished(event.getState());
         StateAction stateAction = requestDto.getStateAction();
         userChecker.checkUserExists(userId);
-        eventChecker.eventExist(eventId);
         eventChecker.eventInitiator(eventId, userId);
         if (requestDto.getEventDate() != null) {
             eventChecker.isEventDateBeforeTwoHours(requestDto.getEventDate());
         }
         if (requestDto.getStateAction() != null) {
-            eventChecker.eventPublished(event);
             if (event.getState().equals(State.CANCELED) && stateAction.equals(StateAction.SEND_TO_REVIEW)) {
                 event.setState(State.PENDING);
                 return eventMapper.toEventFullDto(eventRepository.save(event));
@@ -287,7 +285,7 @@ public class EventServiceImpl implements EventService {
         return statsList.isEmpty() ? 0 : statsList.get(0).getHits();
     }
 
-    List<Event> getEventViewsList(List<Event> events) {
+    private List<Event> getEventViewsList(List<Event> events) {
         String eventUri = "/events/";
         List<String> uriEventList = events.stream()
                 .map(e -> eventUri + e.getId().toString())
@@ -306,7 +304,6 @@ public class EventServiceImpl implements EventService {
         if (hitDtoList.isEmpty()) {
             events.forEach(e -> hits.put(e.getId(), 0L));
         } else {
-
             hitDtoList.forEach(s -> hits.put(
                     (long) Integer.parseInt(s.getUri().replace("/events/", "")), s.getHits()));
         }
