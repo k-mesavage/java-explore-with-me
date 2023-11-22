@@ -17,7 +17,7 @@ public class CommentDto {
 
     private Long eventId;
 
-    private Long text;
+    private String text;
 
     private LocalDateTime created;
 }
