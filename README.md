@@ -13,3 +13,5 @@ TODO: •Comment
 TODO: •Auth
 ![main-service/src/main/resources/ewm-db_pic.jpg](main-service/src/main/resources/ewm-db_pic.jpg)  
 ![main-service/src/main/resources/stats-db_pic.jpg](main-service/src/main/resources/stats-db_pic.jpg)
+
+Docker-compose.yml ready to start.
