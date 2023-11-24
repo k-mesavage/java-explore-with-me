@@ -10,5 +10,6 @@ One-board service for explore locations and enjoy funny time!
 •Send request  
 •Like it  
 TODO: •Comment  
+TODO: •Auth
 ![main-service/src/main/resources/ewm-db_pic.jpg](main-service/src/main/resources/ewm-db_pic.jpg)  
 ![main-service/src/main/resources/stats-db_pic.jpg](main-service/src/main/resources/stats-db_pic.jpg)
