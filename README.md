@@ -1,5 +1,7 @@
 ЦC: https://github.com/k-mesavage/java-explore-with-me/pull/6
 
+Java 11, Spring Boot, Spring Data, Lombok, Spring Jpa, PostgreSQL, Hibernate ORM, Docker.
+
 Explore With Me:  
 
 ![main-service/src/main/resources/explore_with_me_main_pic.jpg](main-service/src/main/resources/explore_with_me_main_pic.jpg)  
