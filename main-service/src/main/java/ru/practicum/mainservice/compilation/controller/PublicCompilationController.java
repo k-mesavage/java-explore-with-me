@@ -2,6 +2,8 @@ package ru.practicum.mainservice.compilation.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.mainservice.compilation.dto.CompilationDto;
 import ru.practicum.mainservice.compilation.service.CompilationService;
@@ -19,11 +21,11 @@ public class PublicCompilationController {
     private final CompilationService service;
 
     @GetMapping
-    public List<CompilationDto> findCompilations(@RequestParam(defaultValue = "false") Boolean pinned,
-                                                 @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
-                                                 @Positive @RequestParam(defaultValue = "10") Integer size) {
+    public ResponseEntity<List<CompilationDto>> findCompilations(@RequestParam(defaultValue = "false") Boolean pinned,
+                                                                @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+                                                                @Positive @RequestParam(defaultValue = "10") Integer size) {
         log.info("Get compilations to public");
-        return service.getAllCompilations(pinned, from, size);
+        return ResponseEntity.status(HttpStatus.OK).body(service.getAllCompilations(pinned, from, size));
     }
 
     @GetMapping("/{compId}")
