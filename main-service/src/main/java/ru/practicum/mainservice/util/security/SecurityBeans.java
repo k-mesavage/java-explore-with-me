@@ -13,6 +13,7 @@ class SecurityBeans {
         return http
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
                         .antMatchers("/admin/**").hasRole("ADMIN")
+                        .antMatchers("/users/**").authenticated()
                         .anyRequest().permitAll()
                 )
                 .build();
