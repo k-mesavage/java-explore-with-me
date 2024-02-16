@@ -1,9 +1,6 @@
 package ru.practicum.mainservice.comment.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import ru.practicum.mainservice.util.enums.State;
 
 import javax.persistence.*;
@@ -15,6 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@RequiredArgsConstructor
 public class Comment {
 
     @Id
@@ -36,4 +34,7 @@ public class Comment {
     @Column(name = "comment_state")
     private State state;
 
+    public Comment(String text, Long eventId, Long userId, LocalDateTime created) {
+    }
 }
+

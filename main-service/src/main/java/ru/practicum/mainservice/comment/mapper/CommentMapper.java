@@ -1,8 +1,10 @@
 package ru.practicum.mainservice.comment.mapper;
 
+import org.springframework.stereotype.Service;
 import ru.practicum.mainservice.comment.dto.CommentDto;
 import ru.practicum.mainservice.comment.model.Comment;
 
+@Service
 public class CommentMapper {
 
     public CommentDto toDto(Comment comment) {
