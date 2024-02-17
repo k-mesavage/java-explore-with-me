@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.mainservice.comment.dto.CommentDto;
 import ru.practicum.mainservice.comment.mapper.CommentMapper;
-import ru.practicum.mainservice.comment.model.Comment;
 import ru.practicum.mainservice.comment.repository.CommentRepository;
 import ru.practicum.mainservice.util.checkers.EventChecker;
 
@@ -19,9 +18,9 @@ public class CommentServiceImpl implements CommentService {
     private final CommentMapper commentMapper;
     @Override
     public CommentDto addComment(String text, Long eventId, Long userId, LocalDateTime created) {
-        Comment newComment = new Comment(text, eventId, userId, created);
+        CommentDto newComment = new CommentDto(userId, eventId, text, LocalDateTime.now());
         eventChecker.eventInitiatorIsNot(eventId, userId);
-        commentRepository.save(newComment);
+        commentRepository.save(commentMapper.fromDto(newComment));
         return commentMapper.toDto(newComment);
     }
 }

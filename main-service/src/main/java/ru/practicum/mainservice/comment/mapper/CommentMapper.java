@@ -7,7 +7,7 @@ import ru.practicum.mainservice.comment.model.Comment;
 @Service
 public class CommentMapper {
 
-    public CommentDto toDto(Comment comment) {
+    public CommentDto toDto(CommentDto comment) {
         return CommentDto.builder()
                 .userId(comment.getUserId())
                 .eventId(comment.getEventId())
