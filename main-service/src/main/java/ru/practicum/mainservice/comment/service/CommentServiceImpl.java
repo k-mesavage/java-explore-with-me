@@ -18,7 +18,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentMapper commentMapper;
     @Override
     public CommentDto addComment(String text, Long eventId, Long userId, LocalDateTime created) {
-        CommentDto newComment = new CommentDto(userId, eventId, text, LocalDateTime.now());
+        final CommentDto newComment = new CommentDto(userId, eventId, text, LocalDateTime.now());
         eventChecker.eventInitiatorIsNot(eventId, userId);
         commentRepository.save(commentMapper.fromDto(newComment));
         return commentMapper.toDto(newComment);
