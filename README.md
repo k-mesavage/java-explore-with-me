@@ -9,6 +9,6 @@ One-board service for explore locations and enjoy funny time!
 •Find event  
 •Send request  
 •Like it  
-TODO: •Comment  
+•Comment  
 ![main-service/src/main/resources/ewm-db_pic.jpg](main-service/src/main/resources/ewm-db_pic.jpg)  
 ![main-service/src/main/resources/stats-db_pic.jpg](main-service/src/main/resources/stats-db_pic.jpg)
