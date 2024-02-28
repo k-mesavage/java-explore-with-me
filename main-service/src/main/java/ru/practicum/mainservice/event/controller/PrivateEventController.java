@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.mainservice.comment.dto.CommentDto;
+import ru.practicum.mainservice.comment.service.CommentService;
 import ru.practicum.mainservice.event.dto.EventFullDto;
 import ru.practicum.mainservice.event.dto.NewEventDto;
 import ru.practicum.mainservice.event.dto.UpdateEventRequestDto;
@@ -15,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Valid
@@ -26,6 +29,7 @@ public class PrivateEventController {
 
     private final EventService eventService;
     private final RequestService requestService;
+    private final CommentService commentService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -86,5 +90,13 @@ public class PrivateEventController {
                                              @PathVariable Long eventId) {
         log.info("User {} get requests", userId);
         return requestService.getRequestsByInitiator(userId, eventId);
+    }
+
+    @PostMapping("/{eventId}/comment")
+    public CommentDto addComment(@PathVariable Long userId,
+                                 @PathVariable Long eventId,
+                                 @RequestBody String text) {
+        log.info("User {} add comment to event {}", userId, eventId);
+        return commentService.addComment(text, eventId, userId, LocalDateTime.now());
     }
 }

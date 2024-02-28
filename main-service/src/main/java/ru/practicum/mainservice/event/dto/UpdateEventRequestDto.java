@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import ru.practicum.mainservice.location.model.Location;
 import ru.practicum.mainservice.util.enums.StateAction;
 
+import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
