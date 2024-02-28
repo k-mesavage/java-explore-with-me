@@ -9,6 +9,7 @@ import ru.practicum.mainservice.location.model.Location;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
@@ -43,6 +44,7 @@ public class NewEventDto {
     @NotNull
     private boolean paid;
 
+    @Positive
     private Integer participantLimit = 0;
 
     @NotNull
