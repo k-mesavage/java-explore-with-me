@@ -16,6 +16,7 @@ public class CommentServiceImpl implements CommentService {
     private final EventChecker eventChecker;
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
+
     @Override
     public CommentDto addComment(String text, Long eventId, Long userId, LocalDateTime created) {
         final CommentDto newComment = new CommentDto(userId, eventId, text, LocalDateTime.now());
